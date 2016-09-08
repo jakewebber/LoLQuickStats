@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/riot-api-java.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://rithms.net/riot-api-java/doc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/gson-2.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/platform.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/jsonmarshaller-0.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/commons-beanutils-1.9.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/ghost4j-1.0.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/itext-2.1.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/jai_imageio.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/jna.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/jul-to-slf4j-1.7.13.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/lept4j-1.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/logback-classic-1.1.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/logback-core-1.1.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/rococoa-core-0.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/slf4j-api-1.7.13.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/xmlgraphics-commons-1.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/lib/tess4j-3.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/Filters.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/ShouldIDodge/jfoenix.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,73 @@
+
+/* Styling about button */
+#analyze-button{
+    -fx-padding: 0.7em 0.57em;
+    -fx-font-size: 20px;
+    -fx-button-type: RAISED;
+    -fx-background-color:    #002266
+;
+    -fx-pref-width: 200;
+    -fx-text-fill: WHITE;
+}
+#analyze-button:hover{
+  
+    -fx-background-color: royalblue;
+ 
+}
+#fetch-button{
+    -fx-padding: 0.7em 0.57em;
+    -fx-font-size: 20px;
+    -fx-button-type: RAISED;
+    -fx-background-color:  #b38600;
+    -fx-pref-width: 200;
+    -fx-text-fill: WHITE;
+}
+#fetch-button:hover{
+    -fx-background-color: #e6ac00;
+}
+#about-button{
+	-fx-padding: 4;
+	-fx-font-size: 15px;
+	-fx-button-type: RAISED;
+	-fx-background-color: rgb(128,128,128, .5);
+
+	-fx-pref-width: 50;
+	-fx-text-fill: black;
+}
+#about-button:hover{
+	-fx-button-type: RAISED;
+	-fx-background-color: rgb(150,150,150, 1);
+	-fx-pref-width: 50;
+	-fx-text-fill: black;
+}
+
+/* Styling close button */
+#close-button{
+	-fx-padding: 4;
+	-fx-font-size: 14px;
+	-fx-button-type: RAISED;
+	-fx-background-color: rgbA(204, 50, 50, .5);
+	-fx-pref-width: 50;
+	-fx-text-fill: black;
+}
+#close-button:hover{
+	-fx-font-size: 14px;
+	-fx-button-type: RAISED;
+	-fx-background-color: rgbA(230, 50, 50, 1);
+	-fx-pref-width: 50;
+	-fx-text-fill: black;
+}
+.jfx-tab-pane .tab-header-area .jfx-rippler{
+    -fx-rippler-fill :black;
+}
+
+
+.jfx-tab-pane .tab-header-background{
+		-fx-rippler-fill: black;
+		-fx-background-color: gray;
+	
+    -fx-stroke : RED;
+}
+.jfx-tab-pane .tab-header-area .headers-region .tab-selected-line {
+    -fx-stroke: black;
+}

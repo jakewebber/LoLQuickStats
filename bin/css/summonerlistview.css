@@ -1,0 +1,121 @@
+#image-box{
+   -fx-border-color: white;
+   -fx-border-insets: 0;
+   -fx-border-width: 3;
+}
+#summoner-box{
+   -fx-border-color: grey;
+   -fx-border-insets: 0;
+   -fx-border-width: 1;
+    -fx-background-color:rgba(0, 0, 0, .5)
+}
+
+#game-stats-box{
+   -fx-border-color: grey;
+   -fx-border-insets: 0;
+   -fx-border-width: 1;
+    -fx-background-color:rgba(0, 0, 0, .5)
+}
+
+#mastery-box{
+   -fx-border-color: grey;
+   -fx-border-insets: 0;
+   -fx-border-width: 1;
+    -fx-background-color:rgba(0, 0, 0, .5)
+}
+
+#rank-label {
+    -fx-font-size: 20px;
+   	-fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+#info-label {
+    -fx-font-size:18px;
+   	-fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.progress-bar {
+    -fx-skin: "com.sun.javafx.scene.control.skin.ProgressBarSkin";
+    -fx-background-insets: 0, 0;
+    -fx-indeterminate-bar-length: 60;
+    -fx-indeterminate-bar-escape: true;
+    -fx-indeterminate-bar-flip: true;
+    -fx-indeterminate-bar-animation-time: 2;
+}
+.progress-bar .bar {
+    -fx-background-color: lightskyblue ;
+   	-fx-padding: 2px; 
+    -fx-background-insets: 0; 
+    
+}
+
+
+.progress-bar .track {
+     -fx-background-color: crimson ;
+  -fx-background-insets: 0, 0;
+}
+
+.progress-bar:disabled {
+    -fx-opacity: -fx-disabled-opacity;
+}
+
+.jfx-list-view .scroll-bar:horizontal .track,
+.jfx-list-view .scroll-bar:vertical .track{
+    -fx-background-color:transparent;
+    -fx-border-color:transparent;
+    -fx-background-radius: 0em;
+    -fx-border-radius:2em;
+}
+.jfx-list-view {
+	-fx-background-insets: 0.0;
+	 -fx-background-color: transparent;
+  	-fx-cell-horizontal-margin: 0.0;
+  	-fx-cell-vertical-margin: 50.0;
+  	-fx-cell-padding:0 0 10 10;
+  	
+  	-fx-vertical-gap : 50;
+  	-fx-expanded : true;
+}
+ 
+.jfx-list-view .scroll-bar:horizontal .increment-button ,
+.jfx-list-view .scroll-bar:horizontal .decrement-button {
+    -fx-background-color:transparent;
+    -fx-background-radius: 0em;
+    -fx-padding:0 0 10 0;
+}
+ 
+.jfx-list-view .scroll-bar:vertical .increment-button ,
+.jfx-list-view .scroll-bar:vertical .decrement-button {
+    -fx-background-color:transparent;
+    -fx-background-radius: 0em;
+    -fx-padding:0 10 0 0;
+}
+.jfx-list-view  .scroll-bar .increment-arrow,
+.jfx-list-view  .scroll-bar .decrement-arrow{
+    -fx-shape:" ";  
+    -fx-padding:0;
+}
+ 
+.jfx-list-view .scroll-bar:horizontal .thumb,
+.jfx-list-view .scroll-bar:vertical .thumb {
+    -fx-background-color:derive(black,90%);
+    -fx-background-insets: 2, 0, 0;
+    -fx-background-radius: 2em;
+}
+.jfx-list-cell .jfx-rippler{
+	-fx-rippler-fill:TEAL;
+	
+}
+.jfx-list-cell { 
+	-fx-effect: dropshadow(gaussian, black, 15, 0, 0, 0);
+	-fx-background-insets: 5,5,5,5;
+	-fx-background-color: rgba(255, 255, 255, 0.87)
+}
+.jfx-list-cell:filled:hover { 
+	-fx-text-fill: black;
+}
+/*.jfx-text-field{
+   -fx-focus-color: teal;
+   -fx-unfocus-color: transparent;
+}*/
