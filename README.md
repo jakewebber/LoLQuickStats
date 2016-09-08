@@ -1,7 +1,8 @@
-<img align="center" src="https://raw.githubusercontent.com/jakewebber/ShouldIDodge/f8c8d2a2634fa4869bd6232f2bc6a70c05fb0246/shouldidodge.png">
-<i>Instant stats for your League of Legends team lobby are one click away. Don't let solo queue get you down.</i>
-#WORK IN PROGRESS
+<img align="center" src="https://raw.githubusercontent.com/jakewebber/ShouldIDodge/master/shouldidodge.png">
+<i>Instant stats for your League of Legends team lobby, just a few clicks away.</i>
 
-Use printscreen to capture your current game window to your clipboard and load it into ShouldIDodge. 
+#Instructions
 
-
+- Use  `ctrl + printscreen` to capture your current game lobby to the clipboard at any point and load it into ShouldIDodge.
+- Edit the summoner names and champions as your team locks in (or screenshot after everyone has locked in)
+- Fetch data to see instant stats on each team member with the champion they're playing. 
