@@ -37,13 +37,12 @@ import net.rithms.riot.api.RiotApiException;
 import net.rithms.riot.constant.PlatformId;
 
 public class LeagueData {
-	private static final RiotApi api = new RiotApi("KEY_HERE");
+	private static final RiotApi api = new RiotApi("KEY");
 	public ChampionList champsList = new ChampionList();
 	public static AggregatedStats summonerStats = new AggregatedStats();
 	public static Map<String, Champion> champsMap;
 	public ArrayList<BufferedImage> champIcons; 
 	public ArrayList<BufferedImage> champSplashArt; 
-
 	public  ArrayList<String> champNames; // All champion names
 	public  ArrayList<String> summonerChampNames;
 	public  ArrayList<BufferedImage> summonerChampIcons;
@@ -51,26 +50,28 @@ public class LeagueData {
 	public  ArrayList<Integer> summonerChampAccuracies;
 	public  ArrayList<String> summonerNames;
 	public static ScreenOCR ocr = new ScreenOCR();
+	public static String riotDirectory;
 
 	/** Initialize variables 
 	 * @throws IOException 
 	 * @throws TesseractException */
-	public LeagueData() throws RiotApiException{
+	public LeagueData(String riotDir) throws RiotApiException{
+		riotDirectory = riotDir;
 		this.champsList = 		api.getDataChampionList(); //get list of all champions
 		LeagueData.champsMap =	champsList.getData();
 		this.champIcons = 		getChampIcons();
-		this.champSplashArt = 		getChampSplashArt();
+		this.champSplashArt = 	getChampSplashArt();
 		this.champNames = 		getChampOrder();
 	}
 
 	/** Updates summonerChampIcons and summonerNames with values from the screenshot */
 	@SuppressWarnings("static-access")
 	public void screenImage(java.awt.Image screenshot) throws IOException, TesseractException{
-		this.summonerChampIcons = ocr.screenChampions(screenshot);
-		this.summonerNames = 		ocr.screenSummoners(screenshot);
-		this.summonerChampNames = new  ArrayList<String>();
-		this.summonerChampIndices = new  ArrayList<Integer>();
-		this.summonerChampAccuracies = new  ArrayList<Integer>();
+		this.summonerChampIcons = 		ocr.screenChampions(screenshot);
+		this.summonerNames = 			ocr.screenSummoners(screenshot);
+		this.summonerChampNames = 		new  ArrayList<String>();
+		this.summonerChampIndices = 	new  ArrayList<Integer>();
+		this.summonerChampAccuracies = 	new  ArrayList<Integer>();
 
 
 		/* Compare each summoner champion icon to the champIcons for best match */
@@ -89,11 +90,16 @@ public class LeagueData {
 
 	/** Gets an ArrayList of all League champion Icons. Used to compare with screenshot */
 	public static ArrayList<BufferedImage> getChampIcons(){
-		String location = "C:\\Riot Games\\League of Legends\\RADS\\projects\\lol_air_client\\releases\\";
+		String location = riotDirectory + "/League of Legends/RADS/projects/lol_air_client/releases/";
 		File directory = new File(location);
 		File[] filelist = directory.listFiles(); //get dynamic version folder between projects and assets.
-		location = filelist[0] + "\\deploy\\assets\\images\\champions\\";
+		if(filelist != null){
+			location = filelist[0] + "/deploy/assets/images/champions/";
+		}else{
+			return null;
+		}
 		ArrayList<BufferedImage> champIcons = new ArrayList<BufferedImage>();
+
 		for (Map.Entry<String, Champion> entry : champsMap.entrySet()) {
 			BufferedImage image;
 			try {
@@ -183,6 +189,9 @@ public class LeagueData {
 			e.printStackTrace();
 			summonerinfo.errorcode = e.getErrorCode();
 			return summonerinfo; 
+		}catch(NullPointerException e){
+			summonerinfo.champmasterylevel = 0;
+			summonerinfo.champmasterypoints = 0;
 		}
 		try{
 			AggregatedStats champstats = new AggregatedStats();
@@ -229,10 +238,15 @@ public class LeagueData {
 
 	/** Gets an ArrayList of all League splash arts. Used for GUI visuals */
 	public static ArrayList<BufferedImage> getChampSplashArt(){
-		String location = "C:\\Riot Games\\League of Legends\\RADS\\projects\\lol_air_client\\releases\\";
+		String location = riotDirectory + "/League of Legends/RADS/projects/lol_air_client/releases/";
 		File directory = new File(location);
 		File[] filelist = directory.listFiles(); //get dynamic version folder between projects and assets.
-		location = filelist[0] + "\\deploy\\assets\\images\\champions\\";
+		if(filelist != null){
+			location = filelist[0] + "/deploy/assets/images/champions/";
+		}else{
+			return null;
+		}
+
 		ArrayList<BufferedImage> champIcons = new ArrayList<BufferedImage>();
 		for (Map.Entry<String, Champion> entry : champsMap.entrySet()) {
 			BufferedImage image;
@@ -250,16 +264,20 @@ public class LeagueData {
 	}
 
 	public static javafx.scene.image.Image getChampSplashArt(String champion){
-		String location = "C:/Riot Games/League of Legends/RADS/projects/lol_air_client\\releases\\";
+		String location = riotDirectory + "/League of Legends/RADS/projects/lol_air_client/releases/";
 		File directory = new File(location);
 		File[] filelist = directory.listFiles(); //get dynamic version folder between projects and assets.
-		location = "file:" + filelist[0] + "\\deploy\\assets\\images\\champions\\";
+		if(filelist != null){
+			location = "file:" + filelist[0] + "/deploy/assets/images/champions/";
+		}else{
+			return null;
+		}
 		String url = location + champion + "_Splash_Centered_0.jpg";
 
 		System.out.println(url);
 		javafx.scene.image.Image image;
 		image = new javafx.scene.image.Image (url);
-	
+
 		//image = convertCMYK2RGB(toBufferedImage(image.getSubimage( 200, 150, 800, 150).getScaledInstance(600, 100, Image.SCALE_SMOOTH)));
 		WritableImage croppedImage = new WritableImage(image.getPixelReader(), 200, 150, 800, 200);
 		croppedImage = scale(croppedImage, 600, 136, false);

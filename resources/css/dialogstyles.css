@@ -7,7 +7,7 @@
 	-fx-button-type:RAISED;
 	-fx-font-size: 20.0px;
 }
-
+.jfx-dialog{}
 .jfx-dialog-layout {
 	-fx-background-color: black; 
 	-fx-padding: 24.0px 24.0px 16.0px 24.0px;
@@ -19,7 +19,7 @@
 	-fx-text-fill: white;
 }
 .jfx-layout-heading {
-		-fx-background-color: black; 
+	-fx-background-color: black; 
 	-fx-font-size: 20.0px;
 	-fx-font-weight: BOLD;
 	-fx-text-fill: white;
@@ -27,8 +27,8 @@
 	-fx-padding: 5.0 0.0 5.0 0.0; 	
 }
 .jfx-layout-body .header {
-		-fx-text-fill: white;
-		-fx-background-color: black; 
+	-fx-text-fill: white;
+	-fx-background-color: black; 
 	-fx-font-size: 20.0px;
 	-fx-pref-width: 400.0px;
 	-fx-wrap-text: true;

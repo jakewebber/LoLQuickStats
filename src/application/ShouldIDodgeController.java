@@ -1,5 +1,11 @@
 package application;
+import java.awt.Color;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.text.NumberFormat;
 import com.jfoenix.controls.JFXButton;
@@ -22,6 +28,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
@@ -63,23 +70,32 @@ public class ShouldIDodgeController implements Initializable {
 	private ClipBoardImage clipboardimage = new ClipBoardImage();
 	private java.awt.Image screenshot;
 	private boolean dialogShowing = false;
+	private Properties props = new Properties();
+	public String riotDirectory = "";
+	public String region = "";
 
-	private static final RiotApi api = new RiotApi("KEY_HERE");
+
+	private static final RiotApi api = new RiotApi("KEY");
 
 
 
 	@SuppressWarnings({ "rawtypes", "static-access", "unused", "unchecked" })
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-		try { 
-			//Initial API call for setting up League data variables
-			try{
-				api.setRegion(Region.NA);
-				data = new LeagueData();
-				System.out.println("data success");
-
-			}catch(RiotApiException e){
-				handleRiotException(e, null);
+		try {
+			// If settings properties exist, load them
+			if(new File(System.getProperty("user.dir") + "/user.properties").exists()){
+				props = loadProperties(System.getProperty("user.dir"));
+				region = props.getProperty("Region", "NA");
+				riotDirectory = props.getProperty("Riot directory", "C:/Riot Games/");
+			}else{ //If they do not, try to set defaults.
+				riotDirectory = "C:/Riot Games/";
+				region  = "NA";
+				if(!new File("C:/Riot Games/").exists()){ // Default riot dir not found
+					riotDirectory = getRiotDirectory();
+				}
 			}
+			//Initial API call for setting up League data variables
+			initializeLeagueData();
 			//SummonerInfo summoner1info = data.getSummonerData("Tunt Coaster", "Bard");
 			BackgroundImage background = new BackgroundImage(new Image("/images/background.jpg",1280,800,false,true),
 					BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
@@ -380,6 +396,7 @@ public class ShouldIDodgeController implements Initializable {
 		}
 		dialogShowing = true;
 		JFXDialog dialog = new JFXDialog();
+		
 		JFXDialogLayout dialogLayout = new JFXDialogLayout();
 		Label headerLabel = new Label(header);
 		headerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 30));
@@ -398,13 +415,107 @@ public class ShouldIDodgeController implements Initializable {
 		dialog.setContent(dialogLayout);
 		dialog.setTransitionType(DialogTransition.CENTER);
 		dialog.setStyle("-fx-background-color: rgba(0.0,0.0,0.0,.5);"
-				+ "	-fx-padding: 0px 0px 0px 0px;");
+				+ "	-fx-padding: 1px 1px 1px 1px;");
 		dialog.show((StackPane) mainpane.getParent());
 		dialog.setOnDialogClosed(event ->{
 			dialogShowing = false;
 		});
 	}
+	public void initializeLeagueData(){
+		try{
+			api.setRegion(Region.valueOf(region));
+			data = new LeagueData(riotDirectory);
+			System.out.println("data success");
+			if(data.champIcons == null || data.champSplashArt == null){
+				 riotDirectoryDialog();
+			}
+		}catch(RiotApiException e){
+			handleRiotException(e, null);
+		}
+	}
 
+	/** Save the settings properties for ShouldIDodge. 
+	 * @param workingDir Properties save location
+	 * @param riotDir for loading Riot image data
+	 * @param region for Riot API user region */
+	public void saveProperties(String workingDir, String riotDir, String region) {
+		try {            
+			// Create a properties file
+			props.setProperty("Riot directory", riotDir);
+			props.setProperty("Region", region);
+			File f = new File(workingDir + "//user.properties");
+			OutputStream out = new FileOutputStream( f );
+			props.store(out, "ShouldIDodge Settings");
+		}
+		catch (Exception e ) {
+			e.printStackTrace();
+		}
+	}
+	
+	/** Load properties from a given directory (should be working dir)
+	 * @param workingDir
+	 * @return Properties from given directory */
+	public Properties loadProperties(String workingDir) {
+		try {            
+			InputStream in = new FileInputStream(workingDir + "\\user.properties");
+			Properties properties = new Properties();
+			System.out.println(workingDir + "\\user.properties");
+			properties.load(in);
+			in.close();
+			return properties;	       
+		}
+		catch (Exception e ) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/** Open a File Chooser to select a directory  */
+	public String getRiotDirectory() {
+		DirectoryChooser  chooser = new DirectoryChooser();
+		chooser.setInitialDirectory(new File(System.getProperty("user.home")));
+		chooser.setTitle("Select Riot Games Directory");
+		File file = chooser.showDialog(stage);
+		if (file != null) {
+			return file.getAbsolutePath();
+		}
+		return null;
+	}
+
+	/** Display a JFXDialog notifying the user to select a valid Riot Games directory. */
+	public void riotDirectoryDialog(){
+		JFXDialog dialog = new JFXDialog();
+		JFXDialogLayout dialogLayout = new JFXDialogLayout();
+		Label headerLabel = new Label("Invalid Riot Directory");
+		headerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+		HBox headerbox = new HBox();
+		headerbox.setPadding(new Insets(1, 1, 1, 1));
+		headerbox.getChildren().add(headerLabel);
+		dialogLayout.setHeading(headerbox);
+		BorderPane mainbody = new BorderPane();
+		Label messageLabel = new Label("The specified directory for Riot Games did not have "
+				+ "the necessary files. Please select the Riot Games directory.");
+		messageLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 20));
+		mainbody.setCenter(messageLabel);
+		mainbody.setRight(new ImageView("/images/teemo.png"));
+		JFXButton selectDir = new JFXButton("Select Riot Directory");
+		selectDir.setId("directory-button");
+		selectDir.setOnAction(event ->{
+			selectDir.setDisable(true);
+			messageLabel.setText("Please wait...");
+			riotDirectory = getRiotDirectory();
+			initializeLeagueData();
+			dialog.close();
+		});
+		mainbody.setBottom(selectDir);
+		dialogLayout.setBody(mainbody);
+		dialog.requestFocus();
+		dialog.setContent(dialogLayout);
+		dialog.setTransitionType(DialogTransition.CENTER);
+		dialog.setStyle("-fx-background-color: rgba(0.0,0.0,0.0,.5);"
+				+ "	-fx-padding: 1px 1px 1px 1px;");
+		dialog.show((StackPane) mainpane.getParent());
+	}
 
 
 	/**
@@ -447,9 +558,9 @@ public class ShouldIDodgeController implements Initializable {
 	/** Create toolbar window buttons */
 	class WindowButtons extends HBox {
 		public WindowButtons() {
-			JFXComboBox<String>  region = new JFXComboBox<String>();
-			region.setMaxHeight(20);
-			region.getItems().addAll(
+			JFXComboBox<String>  regionComboBox = new JFXComboBox<String>();
+			regionComboBox.setMaxHeight(20);
+			regionComboBox.getItems().addAll(
 					Region.NA.toString().toUpperCase(),
 					Region.EUW.toString().toUpperCase(),
 					Region.EUNE.toString().toUpperCase(),
@@ -462,15 +573,16 @@ public class ShouldIDodgeController implements Initializable {
 					Region.RU.toString().toUpperCase(),
 					Region.TR.toString().toUpperCase()
 					);
-			region.valueProperty().setValue(api.getRegion().toString().toUpperCase());
-			region.valueProperty().addListener(new ChangeListener<String>() {
+			regionComboBox.valueProperty().setValue(api.getRegion().toString().toUpperCase());
+			regionComboBox.valueProperty().addListener(new ChangeListener<String>() {
 				@Override public void changed(@SuppressWarnings("rawtypes") ObservableValue ov, String t, String t1) {
 					System.out.println(ov.getValue());
 					api.setRegion(Region.valueOf(ov.getValue().toString()));
+					region = ov.getValue().toString();
 					System.out.println(api.getRegion().toString());
 				}
 			});
-			api.setRegion(Region.NA);
+			api.setRegion(Region.valueOf(region));
 
 			/* Create about button */
 			JFXButton aboutBtn = new JFXButton("?");
@@ -523,13 +635,14 @@ public class ShouldIDodgeController implements Initializable {
 			closeBtn.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent actionEvent) {
+					saveProperties(System.getProperty("user.dir"), riotDirectory, region);
 					Platform.exit();
 				}
 			});
 			//HBox alignRight = new HBox();
 			Pane separator = new Pane();
 			separator.setMinSize(15,  0);
-			this.getChildren().addAll(region, aboutBtn, separator, closeBtn);
+			this.getChildren().addAll(regionComboBox, aboutBtn, separator, closeBtn);
 		}
 	}
 
