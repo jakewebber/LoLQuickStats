@@ -37,7 +37,7 @@ import net.rithms.riot.api.RiotApiException;
 import net.rithms.riot.constant.PlatformId;
 
 public class LeagueData {
-	private static final RiotApi api = new RiotApi("KEY");
+	private static final RiotApi api = new RiotApi("RGAPI-851961F6-38C9-4E88-B5AA-26252ECF0849");
 	public ChampionList champsList = new ChampionList();
 	public static AggregatedStats summonerStats = new AggregatedStats();
 	public static Map<String, Champion> champsMap;

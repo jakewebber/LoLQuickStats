@@ -75,7 +75,7 @@ public class ShouldIDodgeController implements Initializable {
 	public String region = "";
 
 
-	private static final RiotApi api = new RiotApi("KEY");
+	private static final RiotApi api = new RiotApi("RGAPI-851961F6-38C9-4E88-B5AA-26252ECF0849");
 
 
 
@@ -639,10 +639,19 @@ public class ShouldIDodgeController implements Initializable {
 					Platform.exit();
 				}
 			});
-			//HBox alignRight = new HBox();
+			JFXButton minimizeBtn = new JFXButton("_");
+			minimizeBtn.setId("minimize-button");
+			minimizeBtn.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(ActionEvent actionEvent) {
+		            stage.setIconified(true);
+
+				}
+			});
+			
 			Pane separator = new Pane();
 			separator.setMinSize(15,  0);
-			this.getChildren().addAll(regionComboBox, aboutBtn, separator, closeBtn);
+			this.getChildren().addAll(regionComboBox, aboutBtn, separator, minimizeBtn, closeBtn);
 		}
 	}
 

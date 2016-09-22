@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Sealed: true
+Main-Class: application.ShouldIDodge
+Specification-Title: Java Advanced Imaging Image I/O Tools
+Specification-Version: 1.1
+Specification-Vendor: Sun Microsystems, Inc.
+Implementation-Title: com.sun.media.imageio
+Implementation-Version: 1.1
+Implementation-Vendor: Sun Microsystems, Inc.

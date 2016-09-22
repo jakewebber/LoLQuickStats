@@ -38,30 +38,76 @@ public class ScreenOCR {
 	public static ReduceNoiseFilter noise = new ReduceNoiseFilter();
 	public static ThresholdFilter threshold = new ThresholdFilter();
 	public static GrayscaleFilter grayscale = new GrayscaleFilter();
-	
+
 	ScreenOCR(){
 		List<String> configs = new ArrayList<String>();
 		configs.add("digits");
 		tesseract.setConfigs(configs);
+		tesseract.setPageSegMode(7); //  Treat the image as a single text line.
+		tesseract.setTessVariable("load_system_dawg", "false");
+		tesseract.setTessVariable("load_freq_dawg", "false");
+
 	}
-	
+
 	/**
 	 *  Returns summoner names from League screenshot. */
 	public ArrayList<String> screenSummoners(Image imageFile) throws TesseractException, IOException{
 		BufferedImage image = convertCMYK2RGB(toBufferedImage(imageFile));
 
+		/* Remove RGB Value for Summoner Group Tag */
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[] pixels = new int[width * height];
+		image.getRGB(0, 0, width, height, pixels, 0, width);
+
+		/* average values */
+		int baser = 108;
+		int baseg = 96;
+		int baseb = 68;
+		int baser2 = 216;
+		int baseg2 = 182;
+		int baseb2 = 120;
+
+		int range = 10;
+
+		for (int i = 0; i < pixels.length; i++) {
+			int a = (pixels[i]>>24)		&0xFF;
+			int r = (pixels[i]>>16)		&0xFF;
+			int g = (pixels[i]>>8)		&0xFF;
+			int b = (pixels[i]>>0)		&0xFF;
+			if ( ((r > baser-range && r < baser+range) && (g > baseg-range && g < baseg+range) && (b > baseb-range && b < baseb+range)) ||
+					(r > baser2-range && r < baser2+range) && (g > baseg2-range && g < baseg2+range) && (b > baseb2-range && b < baseb2+range)
+					) {
+				// We'll set the alpha value to 0 for to make it fully transparent.
+				System.out.println("pixel found");
+				pixels[i] = 0xFF000000;
+				pixels[i+1] = 0xFF000000;
+				pixels[i+2] = 0xFF000000;
+				pixels[i-1] = 0xFF000000;
+				pixels[i-2] = 0xFF000000;
+
+
+				//	pixels[i-width] = 0xFF000000;
+				//	pixels[i+width] = 0xFF000000;
+
+			}
+		}
+		image.setRGB(0, 0, width, height, pixels, 0, width);
+		File newFile = new File("C:\\Users\\Jake\\Pictures\\league\\screennewnew.jpg");
+		ImageIO.write(image, "jpg", newFile);
 		/* Apply OCR Optimization to Image */
 		RescaleOp rescaleOp = new RescaleOp(5f, -100, null);
 		rescaleOp.filter(image, image);
 		grayscale.filter(image, image);
 
+
+
 		/* Test optimized image */
-		File newFile = new File("C:\\Users\\Jake\\Pictures\\league\\screennewnew.jpg");
+
+		newFile = new File("C:\\Users\\Jake\\Pictures\\league\\screenOCR.jpg");
 		ImageIO.write(image, "jpg", newFile);
 
 		/* Image pixel parsing definitions */
-		int width = image.getWidth(); 
-		int height = image.getHeight();
 		double xIn = 11.636363636363636363636363636364; //Difference between width and text start
 		double xOut = 5.08; //Difference between width and text end.
 		double yInOne = 6.4; //Difference between height and text top. 
@@ -81,7 +127,17 @@ public class ScreenOCR {
 				(int) (width/xOut - width/xIn), (int)yDiffIn);
 		Rectangle fifth = 	new Rectangle((int) (width/xIn), (int)(height/yInTwo + yDiffOut*3), 
 				(int) (width/xOut - width/xIn), (int)yDiffIn);
-		
+		newFile = new File("C:\\Users\\Jake\\Pictures\\league\\1.jpg");
+		ImageIO.write(image.getSubimage(first.x, first.y, first.width, first.height), "jpg", newFile);
+		newFile = new File("C:\\Users\\Jake\\Pictures\\league\\2.jpg");
+		ImageIO.write(image.getSubimage(second.x, second.y, second.width, second.height), "jpg", newFile);
+		newFile = new File("C:\\Users\\Jake\\Pictures\\league\\3.jpg");
+		ImageIO.write(image.getSubimage(third.x, third.y, third.width, third.height), "jpg", newFile);
+		newFile = new File("C:\\Users\\Jake\\Pictures\\league\\3.jpg");
+		ImageIO.write(image.getSubimage(fourth.x, fourth.y, fourth.width, fourth.height), "jpg", newFile);
+		newFile = new File("C:\\Users\\Jake\\Pictures\\league\\4.jpg");
+		ImageIO.write(image.getSubimage(fifth.x, fifth.y, fifth.width, fifth.height), "jpg", newFile);
+
 		/* Performing OCR on ingame screenshot */
 		String result 	= tesseract.doOCR(image, first).replace("\n", ""); 
 		String result2 	= tesseract.doOCR(image, second).replace("\n", ""); 
@@ -98,7 +154,7 @@ public class ScreenOCR {
 		System.out.println(result + "\n" + result2 + "\n" + result3 + "\n" + result4 + "\n" + result5);
 		return summoners;
 	}
-	
+
 	/** 
 	 * Extract champion images from screenshot.
 	 * @return ArrayList<BufferedImage> 5 bufferedImages of cropped champion icons */
@@ -154,7 +210,7 @@ public class ScreenOCR {
 		summonerChampIcons.add(convertCMYK2RGB(toBufferedImage(cropImage(screenshot, thirdRect).getScaledInstance(120, 120, Image.SCALE_DEFAULT))));
 		summonerChampIcons.add(convertCMYK2RGB(toBufferedImage(cropImage(screenshot, fourthRect).getScaledInstance(120, 120, Image.SCALE_DEFAULT))));
 		summonerChampIcons.add(convertCMYK2RGB(toBufferedImage(cropImage(screenshot, fifthRect).getScaledInstance(120, 120, Image.SCALE_DEFAULT))));
-	
+
 		return summonerChampIcons;
 	}
 
@@ -213,91 +269,92 @@ public class ScreenOCR {
 		BufferedImage dest = src.getSubimage((int) rect.getX(), (int) rect.getY(), rect.width, rect.height);
 		return dest; 
 	}
-	 /** Convert an Image into BufferedImage (since casting not possible). 
-     * Posted by alpha02 at http://www.dreamincode.net/code/snippet1076.htm  */
-    public static BufferedImage toBufferedImage(Image image) {
-        if (image instanceof BufferedImage)
-        return (BufferedImage)image;
+	/** Convert an Image into BufferedImage (since casting not possible). 
+	 * Posted by alpha02 at http://www.dreamincode.net/code/snippet1076.htm  */
+	public static BufferedImage toBufferedImage(Image image) {
+		if (image instanceof BufferedImage)
+			return (BufferedImage)image;
 
-        // This code ensures that all the pixels in the image are loaded
-        image = new ImageIcon(image).getImage();
+		// This code ensures that all the pixels in the image are loaded
+		image = new ImageIcon(image).getImage();
 
-        // Determine if the image has transparent pixels
-        boolean hasAlpha = hasAlpha(image);
+		// Determine if the image has transparent pixels
+		boolean hasAlpha = hasAlpha(image);
 
-        // Create a buffered image with a format that's compatible with the screen
-        BufferedImage bimage = null;
+		// Create a buffered image with a format that's compatible with the screen
+		BufferedImage bimage = null;
 
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
-        try {
-            // Determine the type of transparency of the new buffered image
-            int transparency = Transparency.OPAQUE;
+		try {
+			// Determine the type of transparency of the new buffered image
+			int transparency = Transparency.OPAQUE;
 
-            if (hasAlpha == true)
-                transparency = Transparency.BITMASK;
+			if (hasAlpha == true)
+				transparency = Transparency.BITMASK;
 
-            // Create the buffered image
-            GraphicsDevice gs = ge.getDefaultScreenDevice();
-            GraphicsConfiguration gc = gs.getDefaultConfiguration();
+			// Create the buffered image
+			GraphicsDevice gs = ge.getDefaultScreenDevice();
+			GraphicsConfiguration gc = gs.getDefaultConfiguration();
 
-            bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
-        } catch (HeadlessException e) { } //No screen
+			bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
+		} catch (HeadlessException e) { } //No screen
 
-        if (bimage == null) {
-            // Create a buffered image using the default color model
-            int type = BufferedImage.TYPE_INT_RGB;
+		if (bimage == null) {
+			// Create a buffered image using the default color model
+			int type = BufferedImage.TYPE_INT_RGB;
 
-            if (hasAlpha == true) {type = BufferedImage.TYPE_INT_ARGB;}
-                bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
-        }
+			if (hasAlpha == true) {type = BufferedImage.TYPE_INT_ARGB;}
+			bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
+		}
 
-        // Copy image to buffered image
-        Graphics g = bimage.createGraphics();
+		// Copy image to buffered image
+		Graphics g = bimage.createGraphics();
 
-        // Paint the image onto the buffered image
-        g.drawImage(image, 0, 0, null);
-        g.dispose();
+		// Paint the image onto the buffered image
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
 
-        return bimage;
-    }
+		return bimage;
+	}
 
-    public static boolean hasAlpha(Image image) {
-        // If buffered image, the color model is readily available
-        if (image instanceof BufferedImage)
-            return ((BufferedImage)image).getColorModel().hasAlpha();
+	public static boolean hasAlpha(Image image) {
+		// If buffered image, the color model is readily available
+		if (image instanceof BufferedImage)
+			return ((BufferedImage)image).getColorModel().hasAlpha();
 
-        // Use a pixel grabber to retrieve the image's color model;
-        // grabbing a single pixel is usually sufficient
-        PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
-        try {
-            pg.grabPixels();
-        } catch (InterruptedException e) { }
+		// Use a pixel grabber to retrieve the image's color model;
+		// grabbing a single pixel is usually sufficient
+		PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
+		try {
+			pg.grabPixels();
+		} catch (InterruptedException e) { }
 
-        // Get the image's color model
-        return pg.getColorModel().hasAlpha();
-    }
-    
-    /**This should hanldle the conversions wtih bufferedImages green tints from
-     * incorrect encoding. 
-     * http://stackoverflow.com/questions/2408613/unable-to-read-jpeg-image-using-imageio-readfile-file
-     * @param image in CMYK encoding
-     * @return image in RGB encoding 
-     * @throws IOException  */
-    private static BufferedImage convertCMYK2RGB(BufferedImage image) throws IOException{
-        //Create a new RGB image
-        BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(),
-        BufferedImage.TYPE_3BYTE_BGR);
-        // then do a funky color convert
-        ColorConvertOp op = new ColorConvertOp(null);
-        op.filter(image, rgbImage);
-        return rgbImage;
-    }
+		// Get the image's color model
+		return pg.getColorModel().hasAlpha();
+	}
+
+	/**This should hanldle the conversions wtih bufferedImages green tints from
+	 * incorrect encoding. 
+	 * http://stackoverflow.com/questions/2408613/unable-to-read-jpeg-image-using-imageio-readfile-file
+	 * @param image in CMYK encoding
+	 * @return image in RGB encoding 
+	 * @throws IOException  */
+	private static BufferedImage convertCMYK2RGB(BufferedImage image) throws IOException{
+		//Create a new RGB image
+		BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(),
+				BufferedImage.TYPE_3BYTE_BGR);
+		// then do a funky color convert
+		ColorConvertOp op = new ColorConvertOp(null);
+		op.filter(image, rgbImage);
+		return rgbImage;
+	}
 
 
 	public static void main(String[] args) throws TesseractException, IOException {
+		ScreenOCR ocr = new ScreenOCR();
 		File newFile = new File("C:\\Users\\Jake\\Pictures\\league\\untitled2.png");
 		Image screenshot = ImageIO.read(newFile);
-		//ocr.screenSummoners(screenshot);
+		ocr.screenSummoners(screenshot);
 	}
 }

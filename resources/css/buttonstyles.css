@@ -68,6 +68,23 @@
 	-fx-pref-width: 50;
 	-fx-text-fill: black;
 }
+
+/* Styling minimize button */
+#minimize-button{
+	-fx-padding: 4;
+	-fx-font-size: 14px;
+	-fx-button-type: RAISED;
+	-fx-background-color: rgbA(253, 228, 0, .5);
+	-fx-pref-width: 50;
+	-fx-text-fill: black;
+}
+#minimize-button:hover{
+	-fx-font-size: 14px;
+	-fx-button-type: RAISED;
+	-fx-background-color: rgbA(255, 235, 40, 1);
+	-fx-pref-width: 50;
+	-fx-text-fill: black;
+}
 .jfx-tab-pane .tab-header-area .jfx-rippler{
     -fx-rippler-fill :black;
 }
