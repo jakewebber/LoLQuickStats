@@ -1,5 +1,5 @@
 ###Current Version: 1.0
-<img align="center" src="https://raw.githubusercontent.com/jakewebber/ShouldIDodge/master/shouldidodge.png">
+<img align="center" src="https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/banner.png">
 <i>Instant stats for your League of Legends team lobby, just a few clicks away.</i>
 
 Using Google's Tesseract OCR Enjine and image comparing, ShouldIDodge pulls summoner names and selected champions from a League of Legends lobby screenshot. Using [Riot-API-Java](https://github.com/rithms/riot-api-java), you can quickly look up your team's winrates, mastery levels, and more for the champion they're playing.
