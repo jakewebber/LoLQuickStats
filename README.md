@@ -1,3 +1,4 @@
+###Current Version: 1.0
 <img align="center" src="https://raw.githubusercontent.com/jakewebber/ShouldIDodge/master/shouldidodge.png">
 <i>Instant stats for your League of Legends team lobby, just a few clicks away.</i>
 
