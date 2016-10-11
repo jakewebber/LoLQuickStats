@@ -9,7 +9,7 @@ Using Google's Tesseract OCR Enjine and image comparing, ShouldIDodge pulls summ
 - Fetch data to see instant stats on each team member with the champion they're playing. 
 
 
-<img align="center" src="http://i.imgur.com/F88TsH2.png">
+<img align="center" src=http://i.imgur.com/UbFz5pY.png">
 
 
 #Credits
