@@ -20,7 +20,6 @@ import javax.swing.ImageIcon;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import net.rithms.riot.api.*;
-import net.rithms.riot.constant.Region;
 import net.rithms.riot.dto.Summoner.Summoner;
 import net.sourceforge.tess4j.TesseractException;
 import net.rithms.riot.dto.ChampionMastery.ChampionMastery;
@@ -37,7 +36,7 @@ import net.rithms.riot.api.RiotApiException;
 import net.rithms.riot.constant.PlatformId;
 
 public class LeagueData {
-	private static final RiotApi api = new RiotApi("NEW_KEY");
+	private static final RiotApi api = new RiotApi("API_KEY_HERE");
 	public ChampionList champsList = new ChampionList();
 	public static AggregatedStats summonerStats = new AggregatedStats();
 	public static Map<String, Champion> champsMap;
@@ -52,7 +51,7 @@ public class LeagueData {
 	public static ScreenOCR ocr = new ScreenOCR();
 	public static String riotDirectory;
 
-	/** Initialize variables 
+	/** Constructor - Initialize variables 
 	 * @throws IOException 
 	 * @throws TesseractException */
 	public LeagueData(String riotDir) throws RiotApiException{
@@ -92,12 +91,11 @@ public class LeagueData {
 	public static ArrayList<BufferedImage> getChampIcons(){
 		String location = riotDirectory + "/League of Legends/RADS/projects/lol_air_client/releases/";
 		File directory = new File(location);
-		File[] filelist = directory.listFiles(); //get dynamic version folder between projects and assets.
-		if(filelist != null){
-			location = filelist[0] + "/deploy/assets/images/champions/";
-		}else{
-			return null;
-		}
+		File[] filelist = directory.listFiles(); //get all version folders between projects and assets.
+		int index = getLatestModified(filelist);
+		location = filelist[index] + "/deploy/assets/images/champions/";
+
+		System.out.println("Champ icons dir: " + location);
 		ArrayList<BufferedImage> champIcons = new ArrayList<BufferedImage>();
 
 		for (Map.Entry<String, Champion> entry : champsMap.entrySet()) {
@@ -105,7 +103,8 @@ public class LeagueData {
 			try {
 				image = ImageIO.read(new File(location + entry.getKey() + "_Square_0.png"));
 			} catch (IOException e) {
-				System.out.print("Error: Image file not found for " + entry.getKey());
+				System.out.println("Error: Image file not found for " + entry.getKey() + "_Square_0.png");
+				System.out.println("Method: getChampIcons");
 				return null;
 			}
 			champIcons.add(image);
@@ -120,31 +119,12 @@ public class LeagueData {
 	 * @return SummonerInfo 				*/
 	public SummonerInfo getSummonerData(String name, String champion){
 		if(name.equals("") && champion.equals("")){ // Empty check
+			System.out.println("getSummonerData: Nothing here");
 			return null;
 		}
 		PlatformId platformid = PlatformId.NA;
-		if(api.getRegion().toString().equalsIgnoreCase("na")){
-			platformid = PlatformId.NA;
-		}else if(api.getRegion().toString().equalsIgnoreCase("euw")){
-			platformid = PlatformId.EUW;
-		}else if(api.getRegion().toString().equalsIgnoreCase("eune")){
-			platformid = PlatformId.EUNE;
-		}else if(api.getRegion().toString().equalsIgnoreCase("kr")){
-			platformid = PlatformId.KR;
-		}else if(api.getRegion().toString().equalsIgnoreCase("lan")){
-			platformid = PlatformId.LAN;
-		}else if(api.getRegion().toString().equalsIgnoreCase("las")){
-			platformid = PlatformId.LAS;
-		}else if(api.getRegion().toString().equalsIgnoreCase("oce")){
-			platformid = PlatformId.OCE;
-		}else if(api.getRegion().toString().equalsIgnoreCase("pbe")){
-			platformid = PlatformId.PBE;
-		}else if(api.getRegion().toString().equalsIgnoreCase("ru")){
-			platformid = PlatformId.RU;
-		}else if(api.getRegion().toString().equalsIgnoreCase("tr")){
-			platformid = PlatformId.TR;
-		}
-		Champion champ = champsMap.get(champion);
+		platformid = PlatformId.valueOf(api.getRegion().toString().toUpperCase());
+
 		Summoner summoner;
 		SummonerInfo summonerinfo = new SummonerInfo();
 		try{
@@ -179,7 +159,10 @@ public class LeagueData {
 		summonerinfo.rankdivision = entry.getDivision();
 		summonerinfo.ranklp = entry.getLeaguePoints();
 		System.out.println(league.getTier() + " " + entry.getDivision() + " " + entry.getLeaguePoints());
+		Champion champ = new Champion();
 		try{
+			champ = champsMap.get(champion);
+
 			ChampionMastery mastery = api.getChampionMastery(platformid, summoner.getId(), champ.getId());
 			summonerinfo.champmasterylevel = mastery.getChampionLevel();
 			summonerinfo.champmasterypoints = mastery.getChampionPoints();
@@ -193,6 +176,8 @@ public class LeagueData {
 			summonerinfo.champmasterylevel = 0;
 			summonerinfo.champmasterypoints = 0;
 		}
+		
+		/* Getting champion specific stats past this point */
 		try{
 			AggregatedStats champstats = new AggregatedStats();
 			RankedStats stats = api.getRankedStats(summoner.getId());
@@ -213,6 +198,9 @@ public class LeagueData {
 			e.printStackTrace();
 			summonerinfo.errorcode = e.getErrorCode();
 			return summonerinfo; 
+		}catch(NullPointerException e){
+			System.out.println("getSummonerData: No champion specified for getting champstats");
+			return summonerinfo;
 		}
 		try{
 			PlayerStatsSummaryList statssumlist = api.getPlayerStatsSummary(summoner.getId());
@@ -225,7 +213,6 @@ public class LeagueData {
 			}
 			summonerinfo.rankedtotalwins = statsum.getWins();
 			summonerinfo.rankedtotallosses = statsum.getLosses();
-			AggregatedStats rankedstats = statsum.getAggregatedStats();
 		}catch(RiotApiException e){
 			System.out.println("api exception for statsumlist " +e.getErrorCode());
 			e.printStackTrace();
@@ -241,11 +228,10 @@ public class LeagueData {
 		String location = riotDirectory + "/League of Legends/RADS/projects/lol_air_client/releases/";
 		File directory = new File(location);
 		File[] filelist = directory.listFiles(); //get dynamic version folder between projects and assets.
-		if(filelist != null){
-			location = filelist[0] + "/deploy/assets/images/champions/";
-		}else{
-			return null;
-		}
+		int index = getLatestModified(filelist);
+
+		location = filelist[index] + "/deploy/assets/images/champions/";
+
 
 		ArrayList<BufferedImage> champIcons = new ArrayList<BufferedImage>();
 		for (Map.Entry<String, Champion> entry : champsMap.entrySet()) {
@@ -255,7 +241,8 @@ public class LeagueData {
 				image = convertCMYK2RGB(toBufferedImage(image.getSubimage( 200, 150, 800, 150).getScaledInstance(600, 100, Image.SCALE_SMOOTH)));
 
 			} catch (IOException e) {
-				System.out.print("Error: Image file not found for " + entry.getKey());
+				System.out.println("Error: Image file not found for " + entry.getKey() + "_Splash_Centered_0.jpg");
+				System.out.println("Method: getChampSplashArt");
 				return null;
 			}
 			champIcons.add(image);
@@ -293,6 +280,30 @@ public class LeagueData {
 		return champOrder;
 	}
 
+	/** Determine the index in an array of files[] of the most recently modified file
+	 * by comparing the lastModified property from all files in the array.
+	 *
+	 * @param  fileList Array of files from a desired directory
+	 * @return Integer index of most recently modified file/directory.
+	 * Returns -1 if the File[] array is null. 
+	 */
+	public static int getLatestModified(File[] fileList){
+		if(fileList!= null){
+			long latestVersion = 0;
+			int index = 0;
+			for(int i = 0; i < fileList.length; i++){
+				File currentDir = fileList[i];
+				if(currentDir.lastModified() > latestVersion){
+					latestVersion = currentDir.lastModified();
+					index = i;
+				}
+			}
+			return index;
+		}else{
+			System.out.println("Error: fileList is null.");
+			return -1;
+		}
+	}
 	public static BufferedImage toBufferedImage(Image image) {
 		if (image instanceof BufferedImage)
 			return (BufferedImage)image;

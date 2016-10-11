@@ -1,8 +1,31 @@
 /* Styling buttons*/
+#link-button{
+    -fx-padding: 0.7em 0.57em;
+    -fx-font-size: 16px;
+    -fx-button-type: RAISED;
+    -fx-background-color:  #008060;
+    -fx-pref-width: 250;
+    -fx-text-fill: WHITE;
+}
+#link-button:hover{
+    -fx-background-color: #00cc99;
+}
+
+#website-button{
+   /*  -fx-padding: 0.7em 0.57em;*/
+    -fx-font-size: 20px;
+    -fx-button-type: RAISED;
+    -fx-background-color:  #008060;
+    -fx-pref-width: 250;
+    -fx-text-fill: WHITE;
+}
+#website-button:hover{
+    -fx-background-color: #00cc99;
+}
 
 #analyze-button{
     -fx-padding: 0.7em 0.57em;
-    -fx-font-size: 20px;
+    -fx-font-size: 18px;
     -fx-button-type: RAISED;
     -fx-background-color: #002266;
     -fx-pref-width: 200;
@@ -13,7 +36,7 @@
 }
 #fetch-button{
     -fx-padding: 0.7em 0.57em;
-    -fx-font-size: 20px;
+    -fx-font-size: 18px;
     -fx-button-type: RAISED;
     -fx-background-color:  #b38600;
     -fx-pref-width: 200;
@@ -86,13 +109,13 @@
 	-fx-text-fill: black;
 }
 .jfx-tab-pane .tab-header-area .jfx-rippler{
-    -fx-rippler-fill :black;
+    -fx-rippler-fill :blue;
 }
 
 
 .jfx-tab-pane .tab-header-background{
 		-fx-rippler-fill: black;
-		-fx-background-color: gray;
+		-fx-background-color: black;
 	
     -fx-stroke : RED;
 }
