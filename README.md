@@ -1,7 +1,19 @@
-<img align="center" src="https://raw.githubusercontent.com/jakewebber/ShouldIDodge/f8c8d2a2634fa4869bd6232f2bc6a70c05fb0246/shouldidodge.png">
-<i>Instant stats for your League of Legends team lobby are one click away. Don't let solo queue get you down.</i>
-#WORK IN PROGRESS
+###Current Version: 1.0
+<img align="center" src="https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/banner.png">
+<i>Instant stats for your League of Legends team lobby, just a few clicks away.</i>
 
-Use printscreen to capture your current game window to your clipboard and load it into ShouldIDodge. 
+Using Google's Tesseract OCR Enjine and image comparing, LoLQuickStats retrieves summoner names and selected champions from a League of Legends lobby screenshot. You can quickly look up your team's winrates, mastery levels, and more for the champions they're playing.
+#Instructions
+- Use  `ctrl + printscreen` to capture your current game lobby to the clipboard at any point and load it into ShouldIDodge.
+- Edit the summoner names and champions as your team locks in (or screenshot after everyone has locked in)
+- Fetch data to see instant stats on each team member with the champion they're playing. 
 
 
+<img align="center" src=http://i.imgur.com/UbFz5pY.png">
+
+
+#Credits
+
+ - UI JavaFX Components: [JFoenix](http://jfoenix.com/)
+ - Riot Java API Wrapper: [Riot-API-Java](https://github.com/rithms/riot-api-java)
+ - Some standard League images and icons: [LoL Wiki](http://leagueoflegends.wikia.com/wiki/League_of_Legends_Wiki)
