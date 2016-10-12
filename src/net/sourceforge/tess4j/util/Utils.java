@@ -56,7 +56,8 @@ public class Utils {
      * @param c type of class or interface
      * @return name
      */
-    public static String getConstantName(Object value, Class c) {
+    @SuppressWarnings("rawtypes")
+	public static String getConstantName(Object value, Class c) {
         for (Field f : c.getDeclaredFields()) {
             int mod = f.getModifiers();
             if (Modifier.isStatic(mod) && Modifier.isPublic(mod) && Modifier.isFinal(mod)) {

@@ -17,6 +17,12 @@
 	-fx-padding: 2.0 3.0 2.0 3.0;
 	-fx-font-size: 20.0px;
 }
+#disclaimer-text {
+	-fx-text-fill: white;
+	-fx-background-color: rgb(0, 0, 0, .4);
+	-fx-padding: 2.0 3.0 2.0 3.0;
+	-fx-font-size: 12.0px;
+}
 #summoner-label {
 	-fx-text-fill: white;
 	-fx-background-color: rgb(0, 0, 0, .7);

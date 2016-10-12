@@ -24,7 +24,6 @@ import com.jhlabs.image.GrayscaleFilter;
 import com.jhlabs.image.ReduceNoiseFilter;
 import com.jhlabs.image.ThresholdFilter;
 
-import javafx.util.Pair;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
@@ -53,7 +52,7 @@ public class ScreenOCR {
 	 *  Returns summoner names from League screenshot. */
 	public ArrayList<String> screenSummoners(Image imageFile) throws TesseractException, IOException{
 		BufferedImage image = convertCMYK2RGB(toBufferedImage(imageFile));
-
+		
 		/* Remove RGB Value for Summoner Group Tag */
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -71,7 +70,7 @@ public class ScreenOCR {
 		int range = 10;
 
 		for (int i = 0; i < pixels.length; i++) {
-			int a = (pixels[i]>>24)		&0xFF;
+			//int a = (pixels[i]>>24)		&0xFF;
 			int r = (pixels[i]>>16)		&0xFF;
 			int g = (pixels[i]>>8)		&0xFF;
 			int b = (pixels[i]>>0)		&0xFF;
@@ -79,16 +78,11 @@ public class ScreenOCR {
 					(r > baser2-range && r < baser2+range) && (g > baseg2-range && g < baseg2+range) && (b > baseb2-range && b < baseb2+range)
 					) {
 				// We'll set the alpha value to 0 for to make it fully transparent.
-				System.out.println("pixel found");
 				pixels[i] = 0xFF000000;
 				pixels[i+1] = 0xFF000000;
 				pixels[i+2] = 0xFF000000;
 				pixels[i-1] = 0xFF000000;
 				pixels[i-2] = 0xFF000000;
-
-
-				//	pixels[i-width] = 0xFF000000;
-				//	pixels[i+width] = 0xFF000000;
 
 			}
 		}
@@ -217,10 +211,24 @@ public class ScreenOCR {
 
 	/** Compare part of the screenshot with League's champion icons. 
 	 * Returns the int index of the best match from champIcons. 
+	 * @param img2 locked-in champion icon. 
+	 * @param champiIcons icons for all champions from Riot directory. 
 	 * @return int[0] = index, int[1] = difference %*/
-	public static int[] compareImages(ArrayList<BufferedImage> champIcons, BufferedImage img2 ){
+	public static int[] compareImages(ArrayList<BufferedImage> champIcons, BufferedImage img2){
 		double bestDiff = 100;
 		int position = 0;
+		RescaleOp rescaleOp = new RescaleOp(2f, -20, null);
+		BufferedImage img3 = copyImage(img2); //duplicate buffered image
+		//Hovered champion icon version (need to increase brightness)
+		rescaleOp.filter(img3, img3);
+		File newFile = new File("C:\\Users\\Jake\\Pictures\\league\\ICON.jpg");
+		try {
+			ImageIO.write(img3, "jpg", newFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/* Champion lock comparison (img1 and img2) */
 		for(int i = 0; i < champIcons.size(); i++){
 			BufferedImage img1 = champIcons.get(i);
 			int width1 = img1.getWidth();
@@ -236,6 +244,41 @@ public class ScreenOCR {
 				for (int x = 0; x < width1; x++) {
 					int rgb1 = img1.getRGB(x, y);
 					int rgb2 = img2.getRGB(x, y);
+					int r1 = (rgb1 >> 16) & 0xff;
+					int g1 = (rgb1 >>  8) & 0xff;
+					int b1 = (rgb1      ) & 0xff;
+					int r2 = (rgb2 >> 16) & 0xff;
+					int g2 = (rgb2 >>  8) & 0xff;
+					int b2 = (rgb2      ) & 0xff;
+					diff += Math.abs(r1 - r2);
+					diff += Math.abs(g1 - g2);
+					diff += Math.abs(b1 - b2);
+				}
+			}
+			double n = width1 * height1 * 3;
+			double p = diff / n / 255.0;
+			if(p*100 < bestDiff){
+				bestDiff = p*100;
+				position = i;
+			}
+		}
+		
+		/* Champion hovered comparison (img1 and img3) */
+		for(int i = 0; i < champIcons.size(); i++){
+			BufferedImage img1 = champIcons.get(i);
+			int width1 = img1.getWidth();
+			int width2 = img3.getWidth();
+			int height1 = img1.getHeight();
+			int height2 = img3.getHeight();
+			if ((width1 != width2) || (height1 != height2)) {
+				System.err.println("Error: Images dimensions mismatch at " + i);
+				System.exit(1);
+			}
+			long diff = 0;
+			for (int y = 0; y < height1; y++) {
+				for (int x = 0; x < width1; x++) {
+					int rgb1 = img1.getRGB(x, y);
+					int rgb2 = img3.getRGB(x, y);
 					int r1 = (rgb1 >> 16) & 0xff;
 					int g1 = (rgb1 >>  8) & 0xff;
 					int b1 = (rgb1      ) & 0xff;
@@ -316,6 +359,15 @@ public class ScreenOCR {
 		g.dispose();
 
 		return bimage;
+	}
+	
+	/** Create a copy of the given BufferedImage */
+	public static BufferedImage copyImage(BufferedImage source){
+	    BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
+	    Graphics g = b.getGraphics();
+	    g.drawImage(source, 0, 0, null);
+	    g.dispose();
+	    return b;
 	}
 
 	public static boolean hasAlpha(Image image) {

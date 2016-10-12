@@ -509,7 +509,8 @@ public interface ITessAPI {
          *
          * @return
          */
-        @Override
+        @SuppressWarnings("rawtypes")
+		@Override
         protected List getFieldOrder() {
             return Arrays.asList("count", "progress", "more_to_come", "ocr_alive", "err_code", "cancel", "cancel_this", "end_time", "text");
         }
@@ -578,7 +579,8 @@ public interface ITessAPI {
          *
          * @return
          */
-        @Override
+        @SuppressWarnings("rawtypes")
+		@Override
         protected List getFieldOrder() {
             return Arrays.asList("char_code", "left", "right", "top", "bottom", "font_index", "confidence", "point_size", "blanks", "formatting");
         }

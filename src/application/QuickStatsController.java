@@ -1,5 +1,4 @@
 package application;
-import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,12 +25,10 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
@@ -47,10 +44,8 @@ import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -69,6 +64,7 @@ public class QuickStatsController implements Initializable {
 	@FXML 
 	private BorderPane mainpane; 
 	private Stage stage;
+	@SuppressWarnings("unused")
 	private Scene scene;
 	private LeagueData data;
 	private ClipBoardImage clipboardimage = new ClipBoardImage();
@@ -80,7 +76,7 @@ public class QuickStatsController implements Initializable {
 	public String version = "1.0";
 
 
-	private static final RiotApi api = new RiotApi("API_KEY_HERE");
+	private static final RiotApi api = new RiotApi("RGAPI-a36bfee4-e9c2-455f-809a-ef60f95941c3");
 
 
 
@@ -150,10 +146,10 @@ public class QuickStatsController implements Initializable {
 			mainpane.setTop(toolBar);
 
 			JFXListView<VBox> summonerlist = new JFXListView<VBox>();
-			summonerlist.setPadding(new Insets(10, 0, 10, 0));
+			summonerlist.setPadding(new Insets(0, 0, 20, 0));
 			summonerlist.setMinWidth(300);
 			summonerlist.setMaxWidth(300);
-			summonerlist.setMinHeight(675);
+			summonerlist.setMinHeight(640);
 			//summoner1
 			VBox summoner1 = new VBox();
 			JFXTextField summoner1field = new JFXTextField();   
@@ -161,10 +157,12 @@ public class QuickStatsController implements Initializable {
 			JFXComboBox<String> champ1box = new JFXComboBox<String>();
 			champ1box.getItems().addAll(data.champNames);
 			champ1box.setPromptText("Pick a champion");
-
 			new ComboBoxAutoComplete<String>(champ1box);
-			summoner1.getChildren().addAll(summoner1field, champ1box);
-
+			HBox summoner1FieldBox = new HBox();
+			summoner1FieldBox.setAlignment(Pos.CENTER);
+			summoner1field.setMinWidth(250);
+			summoner1FieldBox.getChildren().addAll(summoner1field, new ImageView("/images/empty.png")); 
+			summoner1.getChildren().addAll(summoner1FieldBox, champ1box);
 			//summoner2
 			VBox summoner2 = new VBox();
 			JFXTextField summoner2field = new JFXTextField();   
@@ -173,7 +171,11 @@ public class QuickStatsController implements Initializable {
 			champ2box.getItems().addAll(data.champNames);
 			champ2box.setPromptText("Pick a champion");
 			new ComboBoxAutoComplete<String>(champ2box);
-			summoner2.getChildren().addAll(summoner2field, champ2box);
+			HBox summoner2FieldBox = new HBox();
+			summoner2FieldBox.setAlignment(Pos.CENTER);
+			summoner2field.setMinWidth(250);
+			summoner2FieldBox.getChildren().addAll(summoner2field, new ImageView("/images/empty.png")); 
+			summoner2.getChildren().addAll(summoner2FieldBox, champ2box);
 			//summoner3
 			VBox summoner3 = new VBox();
 			JFXTextField summoner3field = new JFXTextField(); 
@@ -182,7 +184,11 @@ public class QuickStatsController implements Initializable {
 			champ3box.getItems().addAll(data.champNames);
 			champ3box.setPromptText("Pick a champion");
 			new ComboBoxAutoComplete<String>(champ3box);
-			summoner3.getChildren().addAll(summoner3field, champ3box);
+			HBox summoner3FieldBox = new HBox();
+			summoner3FieldBox.setAlignment(Pos.CENTER);
+			summoner3field.setMinWidth(250);
+			summoner3FieldBox.getChildren().addAll(summoner3field, new ImageView("/images/empty.png")); 
+			summoner3.getChildren().addAll(summoner3FieldBox, champ3box);
 			//summoner4
 			VBox summoner4 = new VBox();
 			JFXTextField summoner4field = new JFXTextField();   
@@ -191,7 +197,11 @@ public class QuickStatsController implements Initializable {
 			champ4box.getItems().addAll(data.champNames);
 			champ4box.setPromptText("Pick a champion");
 			new ComboBoxAutoComplete<String>(champ4box);
-			summoner4.getChildren().addAll(summoner4field, champ4box);
+			HBox summoner4FieldBox = new HBox();
+			summoner4FieldBox.setAlignment(Pos.CENTER);
+			summoner4field.setMinWidth(250);
+			summoner4FieldBox.getChildren().addAll(summoner4field, new ImageView("/images/empty.png")); 
+			summoner4.getChildren().addAll(summoner4FieldBox, champ4box);
 			//summoner5
 			VBox summoner5 = new VBox();
 			JFXTextField summoner5field = new JFXTextField();   
@@ -200,7 +210,11 @@ public class QuickStatsController implements Initializable {
 			champ5box.getItems().addAll(data.champNames);
 			champ5box.setPromptText("Pick a champion");
 			new ComboBoxAutoComplete<String>(champ5box);
-			summoner5.getChildren().addAll(summoner5field, champ5box);
+			HBox summoner5FieldBox = new HBox();
+			summoner5FieldBox.setAlignment(Pos.CENTER);
+			summoner5field.setMinWidth(250);
+			summoner5FieldBox.getChildren().addAll(summoner5field, new ImageView("/images/empty.png")); 
+			summoner5.getChildren().addAll(summoner5FieldBox, champ5box);
 
 			/* Create modifiable vector of summoner fields */
 			Vector<JFXTextField> summonerFields = new Vector<JFXTextField>();
@@ -221,8 +235,8 @@ public class QuickStatsController implements Initializable {
 			BorderPane.setMargin(summonerlist, new Insets(20));
 
 			/* Button for importing image and calling OCR methods */
-			JFXButton importbtn = new JFXButton("Import Clipboard");
-			importbtn.setOnMouseClicked(event -> {
+			JFXButton importButton = new JFXButton("Import Clipboard");
+			importButton.setOnMouseClicked(event -> {
 				try {
 					screenshot = clipboardimage.getImageFromClipboard();
 					if(screenshot != null) {
@@ -256,26 +270,38 @@ public class QuickStatsController implements Initializable {
 					e.printStackTrace();
 				}
 			});
-			importbtn.setId("analyze-button");
+			importButton.setId("analyze-button");
 
 			/* Button for updating summoner info and GUI */
-			JFXButton fetchbtn = new JFXButton("Fetch Data");
-			fetchbtn.setId("fetch-button");
-			fetchbtn.setOnMouseClicked(event -> {
-				rightpane.getChildren().clear(); //remove old images
+			JFXButton fetchButton = new JFXButton("Fetch Data");
+			fetchButton.setId("fetch-button");
+			fetchButton.setOnAction(event -> {
+				// Removing all old graphics
+				rightpane.getChildren().clear(); 
 				centerpane.getChildren().clear();
-				// loop over summoners and champions for info. 
+				for(VBox vbox : summonerlist.getItems()){
+					HBox hbox = (HBox) vbox.getChildren().get(0);
+					ImageView summonerStatusView = (ImageView) hbox.getChildren().get(1);
+					summonerStatusView.setImage(new Image("/images/empty.png"));
+				}
 
+
+				// loop over summoners and champions for info. 
 				for(int i = 0; i < 5; i++){
-					System.out.println("..... " + i);
+					VBox vbox = summonerlist.getItems().get(i); // current VBox within summonerlist
+					HBox hbox = (HBox) vbox.getChildren().get(0); // HBox within VBox
+					ImageView summonerStatusView = (ImageView) hbox.getChildren().get(1); //Imageview within HBox
+
+					System.out.println("Info " + i);
 					String champ = "";
 					if(champFields.get(i).getValue() != null){
 						champ = champFields.get(i).getValue().toString();
 					}
 					String summoner = summonerFields.get(i).getText();	
 					SummonerInfo info = new SummonerInfo();
-					info = data.getSummonerData(summoner, champ);
-
+					if(!summoner.equals("")){
+						info = data.getSummonerData(summoner, champ); // Riot API calls
+					}
 					try{
 						if(info.errorcode!= -1){ // A RiotApiException was thrown
 							handleRiotException(new RiotApiException(info.errorcode), summoner);
@@ -283,10 +309,8 @@ public class QuickStatsController implements Initializable {
 					}catch(NullPointerException e){
 
 					}
-
 					// Handling champion info and picture
-					if(champ.equalsIgnoreCase("") || info == null){ //champ not found
-						System.out.println("champ not found?");
+					if(champ.equalsIgnoreCase("") || info == null || info.errorcode == 404){ // champ or summoner empty or not found
 						StackPane emptybox = new StackPane();
 						emptybox.setMinHeight(136);
 						emptybox.setMaxHeight(136);
@@ -300,8 +324,6 @@ public class QuickStatsController implements Initializable {
 						imageStackPane.setId("image-box");
 						Image champsplash = data.getChampSplashArt(champ);
 						ImageView champSplashView = new ImageView(champsplash);
-						ColorAdjust darken = new ColorAdjust();
-					
 						String masteryURL = "images/mastery/level" + info.champmasterylevel + ".png";
 						Image masteryImage = new Image(masteryURL);
 						ImageView masteryView = new ImageView(masteryImage);
@@ -331,27 +353,29 @@ public class QuickStatsController implements Initializable {
 						gameStatsBox.setAlignment(Pos.CENTER);
 						gameStatsBox.getChildren().addAll(championGamesTotal, championGames, winloss, winpercent);
 						imageBorderPane.setRight(gameStatsBox);
-						
+
 						Label summonerLabel = new Label(capitalize(summoner));
 						summonerLabel.setId("summoner-label");
 						imageBorderPane.setCenter(summonerLabel);
 						imageBorderPane.setAlignment(summonerLabel, Pos.BOTTOM_CENTER);
 						imageStackPane.getChildren().addAll(champSplashView, imageBorderPane);
 						rightpane.getChildren().add(imageStackPane);
-						
-						
 					}
+					
 					// Handling general summoner info and pictures
-					if(summoner.equalsIgnoreCase("") || summoner == null || info == null){ //summoner not found
+					if(summoner.equalsIgnoreCase("") || summoner == null || info == null || info.errorcode == 404){ // no summoner
 						StackPane emptybox = new StackPane();
 						emptybox.setMinHeight(142);
 						centerpane.getChildren().add(emptybox);
+						if(info.errorcode == 404){ //summoner not found in riot's database
+							summonerStatusView.setImage(new Image("/images/exclamation.png"));
+						}
 					}else{
+						summonerStatusView.setImage(new Image("/images/green.png"));
 						System.out.println("Summoner: " + summonerFields.get(i).getText());
 						StackPane summonerbox = new StackPane();
 						summonerbox.setId("summoner-box");
 						summonerbox.setMinHeight(142);
-
 						String tierURL = "images/tier/";
 						if(info.ranktier.equalsIgnoreCase("master") || info.ranktier.equalsIgnoreCase("challenger") || info.ranktier.equalsIgnoreCase("provisional")){
 							tierURL = tierURL  + info.ranktier.toLowerCase() + ".png";
@@ -360,26 +384,47 @@ public class QuickStatsController implements Initializable {
 						}
 						System.out.println(tierURL);
 						Image image = new Image(tierURL);
-						ImageView view = new ImageView(image);
+						ImageView rankView = new ImageView(image);
 						Label rankinfo = new Label(info.rankdivision.substring(0, 1).toUpperCase() + info.rankdivision.substring(1)
 						+ " " + info.ranktier + " " + info.ranklp + " LP");
 						//rankinfo.setTextFill(Color.WHITE);
 						rankinfo.setId("rank-label");
-						summonerbox.getChildren().addAll(view, rankinfo);
+						summonerbox.getChildren().addAll(rankView, rankinfo);
 						StackPane.setAlignment(rankinfo,  Pos.BOTTOM_CENTER);
 						centerpane.getChildren().add(summonerbox);
 					}
 				}
 			});
 
-			BorderPane.setMargin(leftpane, new Insets(25));
-			HBox buttonbox = new HBox();
-			buttonbox.setSpacing(5);
-			Random rand = new Random();
+			/* Clear all current input for the device */
+			JFXButton resetButton = new JFXButton("Reset");
+			resetButton.setId("reset-button");
+			resetButton.setMaxHeight(10);
+			resetButton.setOnAction(event ->{
+				summoner1field.clear();
+				summoner2field.clear();
+				summoner3field.clear();
+				summoner4field.clear();
+				summoner5field.clear();
+				champ1box.setValue(null);
+				champ2box.setValue(null);
+				champ3box.setValue(null);
+				champ4box.setValue(null);
+				champ5box.setValue(null);
+				fetchButton.fire();
+			});
 
-			buttonbox.getChildren().addAll(importbtn, fetchbtn);
+			BorderPane.setMargin(leftpane, new Insets(20));
+			HBox hButtonBox = new HBox();
+			hButtonBox.setSpacing(5);
+			Random rand = new Random();
+			VBox vButtonBox = new VBox();
+			vButtonBox.setAlignment(Pos.CENTER);
+			vButtonBox.setSpacing(5);
+			vButtonBox.getChildren().addAll(hButtonBox, resetButton);
+			hButtonBox.getChildren().addAll(importButton, fetchButton);
 			leftpane.setAlignment(Pos.CENTER);
-			leftpane.getChildren().addAll(summonerlist, buttonbox);
+			leftpane.getChildren().addAll(summonerlist, vButtonBox);
 			mainpane.setLeft(leftpane);
 			mainpane.setRight(rightpane);
 			mainpane.setCenter(centerpane);
@@ -389,7 +434,8 @@ public class QuickStatsController implements Initializable {
 			e.printStackTrace();
 		}
 	}
-	//end of initialize
+	/* ---------------------------------------------------------------------------
+	END OF INITIALIZE */
 
 
 
@@ -415,7 +461,6 @@ public class QuickStatsController implements Initializable {
 		headerLabel.setAlignment(Pos.CENTER);
 		HBox headerbox = new HBox();
 
-		//headerbox.setPadding(new Insets(1, 1, 1, 1));
 		headerbox.getChildren().add(headerLabel);
 		headerbox.setAlignment(Pos.CENTER);
 		//dialogLayout.setHeading(headerbox);
@@ -445,15 +490,15 @@ public class QuickStatsController implements Initializable {
 	}
 	/** Capitalize the first letter of all words in a given string. */
 	public static String capitalize(String text){
-	    String c = (text != null)? text.trim() : "";
-	    String[] words = c.split(" ");
-	    String result = "";
-	    for(String w : words){
-	        result += (w.length() > 1? w.substring(0, 1).toUpperCase(Locale.US) + w.substring(1, w.length()).toLowerCase(Locale.US) : w) + " ";
-	    }
-	    return result.trim();
+		String c = (text != null)? text.trim() : "";
+		String[] words = c.split(" ");
+		String result = "";
+		for(String w : words){
+			result += (w.length() > 1? w.substring(0, 1).toUpperCase(Locale.US) + w.substring(1, w.length()).toLowerCase(Locale.US) : w) + " ";
+		}
+		return result.trim();
 	}
-	
+
 	/** Try to initialize LeagueData with proper Riot Directory */
 	public void initializeLeagueData(){
 		try{
@@ -650,16 +695,22 @@ public class QuickStatsController implements Initializable {
 				public void handle(ActionEvent actionEvent) {
 					JFXDialog dialog = new JFXDialog();
 					dialog.setMinHeight(500);
-					
+
 					Label description = new Label("Welcome to LoLQuickStats Beta 1.0, \n"
 							+ "The fastest way to discover in-depth statistics about your team from the in-game lobby.\n"
 							+ "Information like rank status, individual champion win rates, and mastery level for your \n"
 							+ "entire game lobby with just a few clicks.\n\n"
-							+ "No one but Lee Sin should go in blind.\n"
+							+ "No one but Lee Sin should go in totally blind.\n"
 							+ "                                                                  "
 							+ "                                                              Cheers,\n"
 							+ "                                                                  "
 							+ "                                                              Jacob Webber");
+					Label disclaimer = new Label(
+							"LoLQuickStats isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in \n"
+									+ "producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. \n"
+									+ "League of Legends © Riot Games, Inc.");
+					disclaimer.setId("disclaimer-text");
+
 					JFXButton linkButton = new JFXButton("Github Page");
 					linkButton.setId("website-button");
 					linkButton.setOnAction(new EventHandler<ActionEvent>(){
@@ -678,7 +729,7 @@ public class QuickStatsController implements Initializable {
 							}
 						}
 					});
-				
+
 					description.setPadding(new Insets(20));
 					description.setAlignment(Pos.CENTER);
 					description.setId("info-text");
@@ -698,8 +749,8 @@ public class QuickStatsController implements Initializable {
 					aboutbox.setAlignment(Pos.TOP_CENTER);
 					ImageView banner = new ImageView(new Image("/images/banner.png"));
 					aboutbox.setPadding(new Insets(10, 10, 10, 10));
-					aboutbox.getChildren().addAll(banner, description, linkButton);
-					
+					aboutbox.getChildren().addAll(banner, description, disclaimer, linkButton);
+
 					aboutbox.setBackground(new Background(new BackgroundImage(new Image("/images/background2.jpg"), BackgroundRepeat.NO_REPEAT, 
 							BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, new BackgroundSize(750, 400, false, false, true, true))));
 					//Image about = new Image("/images/about.png");

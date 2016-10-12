@@ -18,7 +18,7 @@ public class LoLQuickStats extends Application {
 		stage.setWidth(1280);
 		stage.setHeight(800);
 		stage.initStyle(StageStyle.UNDECORATED);
-		stage.getIcons().add(new Image("/images/LolQuickStats.png"));
+		stage.getIcons().add(new Image(this.getClass().getResourceAsStream("/images/LoLQuickStats.png")));
 		theStage.setTitle("LoL QuickStats");
 
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/QuickStats.fxml"));		

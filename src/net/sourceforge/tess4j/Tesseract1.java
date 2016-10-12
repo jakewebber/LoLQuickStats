@@ -52,6 +52,7 @@ import org.slf4j.*;
  * <code>jai-imageio</code>, and <code>ghost4j</code>) are in its compile and
  * run-time <code>classpath</code>.
  */
+@SuppressWarnings("unused")
 public class Tesseract1 extends TessAPI1 implements ITesseract {
 
     private String language = "eng";

@@ -1,7 +1,5 @@
 package application;
 
-import net.rithms.riot.api.RiotApiException;
-
 /**
  * Holds data for a summoner and the champion they're playing.
  * @author Jacob Webber
@@ -36,6 +34,5 @@ public class SummonerInfo {
 		System.out.println("average kills: " + champavgkills + " deaths: " + champavgdeaths);
 		System.out.println("total games: " + rankedtotalwins + " / " + rankedtotallosses);
 		System.out.println("-----------------------------");
-
 	}
 }

@@ -23,6 +23,21 @@
     -fx-background-color: #00cc99;
 }
 
+
+
+#reset-button{
+   /*  -fx-padding: 0.7em 0.57em;*/
+    -fx-font-size: 18px;
+    -fx-button-type: RAISED;
+    -fx-background-color: #b22222;
+    -fx-pref-width: 402;
+    -fx-pref-height: 25;
+    -fx-text-fill: WHITE;
+}
+#reset-button:hover{
+    -fx-background-color: #dc143c;
+}
+
 #analyze-button{
     -fx-padding: 0.7em 0.57em;
     -fx-font-size: 18px;

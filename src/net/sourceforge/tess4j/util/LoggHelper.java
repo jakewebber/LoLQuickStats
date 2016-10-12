@@ -20,6 +20,7 @@ package net.sourceforge.tess4j.util;
  *
  * @author O.J. Sousa Rodrigues
  */
+@SuppressWarnings("serial")
 public class LoggHelper extends Exception {
 
     @Override
