@@ -11,8 +11,8 @@ Using Google's Tesseract OCR Enjine and image comparing, LoLQuickStats retrieves
 - Edit the summoner names and champions as your team locks in (or screenshot after everyone has locked in)
 - Fetch data to see instant stats on each team member with the champion they're playing. 
 
-<img align="center" src=http://i.imgur.com/UbFz5pY.png">
-
+<img align="center" src=https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/screenshot2.png">
+<img align="center" src=https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/screenshot1.png">
 
 #Credits
 
