@@ -15,7 +15,11 @@ and run `LoLQuickStats.jar`
 - Use OP.GG and Mastery Level links for more in-depth stats on specific summoners.
 
 <img align="center" src=https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/screenshot2.jpg>
+ 
+
 <img align="center" src=https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/screenshot1.jpg>
+ 
+
 <img align="center" src=https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/screenshot3.jpg>
 
 
