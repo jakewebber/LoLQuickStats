@@ -32,11 +32,10 @@ import net.rithms.riot.dto.Stats.ChampionStats;
 import net.rithms.riot.dto.Stats.PlayerStatsSummary;
 import net.rithms.riot.dto.Stats.PlayerStatsSummaryList;
 import net.rithms.riot.dto.Stats.RankedStats;
-import net.rithms.riot.api.RiotApiException;
 import net.rithms.riot.constant.PlatformId;
 
 public class LeagueData {
-	private static final RiotApi api = new RiotApi("RGAPI-a36bfee4-e9c2-455f-809a-ef60f95941c3");
+	private static final RiotApi api = RiotAPIKey.getAPI();
 	public ChampionList champsList = new ChampionList();
 	public static AggregatedStats summonerStats = new AggregatedStats();
 	public static Map<String, Champion> champsMap;
@@ -54,11 +53,11 @@ public class LeagueData {
 	/** Constructor - Initialize variables 
 	 * @throws IOException 
 	 * @throws TesseractException */
-	public LeagueData(String riotDir) throws RiotApiException{
+	public LeagueData(String riotDir, BufferedImage blankImg) throws RiotApiException{
 		riotDirectory = riotDir;
 		this.champsList = 		api.getDataChampionList(); //get list of all champions
 		LeagueData.champsMap =	champsList.getData();
-		this.champIcons = 		getChampIcons();
+		this.champIcons = 		getChampIcons(blankImg);
 		this.champSplashArt = 	getChampSplashArt();
 		this.champNames = 		getChampOrder();
 	}
@@ -78,17 +77,21 @@ public class LeagueData {
 		for(BufferedImage image : summonerChampIcons){
 			int[] values = ScreenOCR.compareImages(champIcons, image);
 			this.summonerChampIndices.add(values[0]);
-			this.summonerChampAccuracies.add(100 - values[1]);
+			this.summonerChampAccuracies.add(values[1]);
 		}
 		for(int location : summonerChampIndices){
-			this.summonerChampNames.add(champNames.get(location));
-			System.out.println(champNames.get(location));
+			if(location >= champNames.size()){ //empty value
+				this.summonerChampNames.add(null);
+			}else{
+				this.summonerChampNames.add(champNames.get(location));
+				System.out.println(champNames.get(location));
+			}
 		}
 	}
 
 
 	/** Gets an ArrayList of all League champion Icons. Used to compare with screenshot */
-	public static ArrayList<BufferedImage> getChampIcons(){
+	public static ArrayList<BufferedImage> getChampIcons(BufferedImage blankimg){
 		String location = riotDirectory + "/League of Legends/RADS/projects/lol_air_client/releases/";
 		File directory = new File(location);
 		File[] filelist = directory.listFiles(); //get all version folders between projects and assets.
@@ -109,6 +112,7 @@ public class LeagueData {
 			}
 			champIcons.add(image);
 		}
+		champIcons.add(blankimg);
 		return champIcons;
 	}
 

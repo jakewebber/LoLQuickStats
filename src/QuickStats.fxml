@@ -6,7 +6,7 @@
 <AnchorPane id="MainAnchor" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1024" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.QuickStatsController">
 <children>
 <StackPane>
-<children><BorderPane fx:id="mainpane" prefHeight="800" prefWidth="1280" />
+<children><BorderPane fx:id="mainpane" prefHeight="850" prefWidth="1280" />
 </children>
 </StackPane>
 </children>

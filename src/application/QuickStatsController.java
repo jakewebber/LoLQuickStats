@@ -1,13 +1,18 @@
 package application;
+
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
@@ -24,8 +29,12 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -43,6 +52,7 @@ import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
@@ -56,6 +66,8 @@ import net.rithms.riot.api.RiotApiException;
 import net.sourceforge.tess4j.TesseractException;
 import net.rithms.riot.constant.Region;
 import java.util.*;
+
+import javax.imageio.ImageIO;
 
 /**
  * Controller for JavaFX components and GUI
@@ -74,11 +86,18 @@ public class QuickStatsController implements Initializable {
 	public String riotDirectory = "";
 	public String region = "";
 	public String version = "1.0";
+	public boolean firstOpen = false;
+	public int totalSummoners = 0;
+	public int totalChampions = 0;
+	public double totalWinRate = 0;
+	public int totalRank = 0;
+	public int totalLP = 0;
+	public int totalTier = 0;
+	public int emptyWinLosses = 0;
+	public Image[] masteryImages = new Image[5];
+	Image currentMasteryImage = null;
 
-
-	private static final RiotApi api = new RiotApi("RGAPI-a36bfee4-e9c2-455f-809a-ef60f95941c3");
-
-
+	private static final RiotApi api = RiotAPIKey.getAPI();
 
 	@SuppressWarnings({ "rawtypes", "static-access", "unused", "unchecked" })
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
@@ -89,6 +108,7 @@ public class QuickStatsController implements Initializable {
 				region = props.getProperty("Region", "NA");
 				riotDirectory = props.getProperty("Riot directory", "C:/Riot Games/");
 			}else{ //If they do not, try to set defaults.
+				firstOpen = true;
 				riotDirectory = "C:/Riot Games/";
 				region  = "NA";
 				if(!new File("C:/Riot Games/").exists()){ // Default riot dir not found
@@ -97,8 +117,9 @@ public class QuickStatsController implements Initializable {
 			}
 			//Initial API call for setting up League data variables
 			initializeLeagueData();
-			//SummonerInfo summoner1info = data.getSummonerData("Tunt Coaster", "Bard");
-			BackgroundImage background = new BackgroundImage(new Image("/images/background.jpg",1280,800,false,true),
+
+
+			BackgroundImage background = new BackgroundImage(new Image("/images/background.jpg",1280,900,false,true),
 					BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
 					BackgroundSize.DEFAULT);
 			mainpane.setBackground(new Background(background));
@@ -107,8 +128,10 @@ public class QuickStatsController implements Initializable {
 			rightpane.setPadding(new Insets(0, 15, 0, 0));
 			VBox leftpane = new VBox(); // Summoner and champ tables pane
 			leftpane.setMaxWidth(350);
-
-			VBox bottompane = new VBox();
+			leftpane.setMaxHeight(700);
+			VBox bottompane = new VBox(60); // Averages info pane
+			bottompane.setMaxHeight(100);
+			bottompane.setMinHeight(50);
 			VBox centerpane = new VBox(); // Summoner rank info pane
 			centerpane.setMaxWidth(200);
 
@@ -124,10 +147,10 @@ public class QuickStatsController implements Initializable {
 			Text title = new Text("LoL Quick Stats");
 			title.setStyle("-fx-font-family: arial;"
 					+ "-fx-font-size: 22px;"
-					+ "-fx-fill: linear-gradient(from 50% 50% to 100% 100%, goldenrod 0%, gold 50%, peru 100%);"
+					+ "-fx-fill: linear-gradient(from 0% 0% to 100% 100%, goldenrod 0%, gold 50%, peru 100%);"
 					+ "-fx-stroke-width: 1;");
 			toolBar.getItems().addAll(title, pane, new WindowButtons());
-			toolBar.setStyle("-fx-background-color: rgba(153, 255, 204, 0.2);");
+			toolBar.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4);");
 			/* Handle toolbar drag and drop operations */
 			final Delta dragDelta = new Delta();
 			toolBar.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -248,7 +271,6 @@ public class QuickStatsController implements Initializable {
 						}
 						for(int i = 0; i < 5; i++){
 							if(champFields.get(i).getValue() == null){
-								System.out.println("champfield " + i + ":" + champFields.get(i).getValue());
 								System.out.println("champion set: " + data.summonerChampNames.get(i));
 								champFields.get(i).setValue((data.summonerChampNames.get(i)));
 							}
@@ -276,6 +298,7 @@ public class QuickStatsController implements Initializable {
 			JFXButton fetchButton = new JFXButton("Fetch Data");
 			fetchButton.setId("fetch-button");
 			fetchButton.setOnAction(event -> {
+
 				// Removing all old graphics
 				rightpane.getChildren().clear(); 
 				centerpane.getChildren().clear();
@@ -285,6 +308,14 @@ public class QuickStatsController implements Initializable {
 					summonerStatusView.setImage(new Image("/images/empty.png"));
 				}
 
+				/* Reset count values */
+				totalSummoners = 0;
+				totalChampions = 0;
+				totalWinRate = 0;
+				totalTier = 0;
+				totalRank = 0;
+				totalLP = 0;
+				emptyWinLosses = 0;
 
 				// loop over summoners and champions for info. 
 				for(int i = 0; i < 5; i++){
@@ -316,26 +347,70 @@ public class QuickStatsController implements Initializable {
 						emptybox.setMaxHeight(136);
 						rightpane.getChildren().add(emptybox);
 					}else{
+						totalChampions++;
 						System.out.println("Champ: " + champFields.get(i).getValue().toString());
 						StackPane imageStackPane = new StackPane();
 						BorderPane imageBorderPane = new BorderPane();
-						imageStackPane.setMinSize(600,  136);
-						imageBorderPane.setMaxSize(600,  136);
+						imageStackPane.setMinSize(600,  100);
+						imageBorderPane.setMaxSize(600,  100);
 						imageStackPane.setId("image-box");
 						Image champsplash = data.getChampSplashArt(champ);
 						ImageView champSplashView = new ImageView(champsplash);
-						String masteryURL = "images/mastery/level" + info.champmasterylevel + ".png";
+						String masteryLevel = Integer.toString(info.champmasterylevel);
+						String masteryURL = "images/mastery/level" + masteryLevel + ".png";
 						Image masteryImage = new Image(masteryURL);
 						ImageView masteryView = new ImageView(masteryImage);
-						StackPane.setAlignment(masteryView, Pos.CENTER_LEFT);
+
+
+						JFXButton masteryPointsButton = new JFXButton("View Full Mastery Profile");
+						masteryPointsButton.setAlignment(Pos.CENTER);
+						masteryPointsButton.setId("link-mastery-button");
+						masteryPointsButton.setOnMouseClicked(evt ->{
+							URI u = null;
+							try {
+								u = new URI("https://www.masterypoints.com/player/" +  URLEncoder.encode(summoner, "UTF-8") + "/" + region);
+							} catch (URISyntaxException e) {
+								e.printStackTrace();
+							}catch (UnsupportedEncodingException e) {
+								e.printStackTrace();
+							}
+							try {
+								java.awt.Desktop.getDesktop().browse(u);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						});
+						Button masteryButton = new Button();
+						masteryButton.setId(Integer.toString(i)); //marker for masterypoints.com image
+						masteryButton.setStyle("-fx-background-color:transparent; -fx-focus-color: transparent");
+						masteryButton.setGraphic(masteryView);
+						masteryButton.setTooltip(new Tooltip(capitalize(summoner) + " Mastery Summary"));
+						masteryButton.setOnMouseClicked(evt ->{
+							String masteryPointsURL = "";
+							try {
+								masteryPointsURL = "https://www.masterypoints.com/image/profile/" +  URLEncoder.encode(summoner, "UTF-8") + "/" + region;
+							} catch (UnsupportedEncodingException e) {
+								e.printStackTrace();
+							}
+							//masteryImages[]
+							createURLDialog(null, null, Integer.parseInt(masteryButton.getId()), masteryPointsURL, masteryPointsButton);
+							masteryButton.setGraphic(new ImageView(new Image("/images/mastery/level" + masteryLevel + "click.png")));
+						});
+						masteryButton.setOnMouseEntered(evt->{
+							masteryButton.setGraphic(new ImageView(new Image("/images/mastery/level" + masteryLevel + "hover.png")));
+						});
+						masteryButton.setOnMouseExited(evt->{
+							masteryButton.setGraphic(new ImageView(new Image("/images/mastery/level" + masteryLevel + ".png")));
+						});
+						StackPane.setAlignment(masteryButton, Pos.CENTER_LEFT);
 						Label masteryPoints = new Label(NumberFormat.getNumberInstance(Locale.US).format(info.champmasterypoints) + " Points");
 						masteryPoints.setId("info-label");
 						masteryPoints.setTextAlignment(TextAlignment.CENTER);
 						VBox champMasteryBox = new VBox();
-						champMasteryBox.setMinWidth(150);
+						champMasteryBox.setMinWidth(140);
 						champMasteryBox.setId("mastery-box");
 						champMasteryBox.setAlignment(Pos.CENTER);
-						champMasteryBox.getChildren().addAll(masteryView, masteryPoints);
+						champMasteryBox.getChildren().addAll(masteryButton, masteryPoints);
 						imageBorderPane.setLeft(champMasteryBox);
 						Label championGamesTotal = new Label(info.champgamestotal + " Games");
 						championGamesTotal.setId("info-label");
@@ -343,12 +418,20 @@ public class QuickStatsController implements Initializable {
 						championGames.setId("info-label");
 						championGames.setTextAlignment(TextAlignment.CENTER);
 						double winlossratio = (double) info.champgameswon / (double) info.champgamestotal;
+						if(Double.isNaN(winlossratio)){ // Divide by zero check
+							winlossratio = 0;
+						}
+						if(info.rankedtotalwins != 0 || info.rankedtotalwins != 0){ // add winrate only if enough games
+							totalWinRate+= winlossratio;
+						}else{
+							emptyWinLosses++;
+						}
 						ProgressBar winloss = new ProgressBar(winlossratio);
 						Label winpercent = new Label(String.format("%.2f", winlossratio*100) + "%");
 						winpercent.setId("info-label");
 						// Game Stats Box
 						VBox gameStatsBox = new VBox();
-						gameStatsBox.setMinWidth(150);
+						gameStatsBox.setMinWidth(140);
 						gameStatsBox.setId("game-stats-box");
 						gameStatsBox.setAlignment(Pos.CENTER);
 						gameStatsBox.getChildren().addAll(championGamesTotal, championGames, winloss, winpercent);
@@ -361,7 +444,7 @@ public class QuickStatsController implements Initializable {
 						imageStackPane.getChildren().addAll(champSplashView, imageBorderPane);
 						rightpane.getChildren().add(imageStackPane);
 					}
-					
+
 					// Handling general summoner info and pictures
 					if(summoner.equalsIgnoreCase("") || summoner == null || info == null || info.errorcode == 404){ // no summoner
 						StackPane emptybox = new StackPane();
@@ -371,29 +454,88 @@ public class QuickStatsController implements Initializable {
 							summonerStatusView.setImage(new Image("/images/exclamation.png"));
 						}
 					}else{
+						totalSummoners++;
 						summonerStatusView.setImage(new Image("/images/green.png"));
-						System.out.println("Summoner: " + summonerFields.get(i).getText());
 						StackPane summonerbox = new StackPane();
+						summonerbox.setPadding(new Insets(0));
 						summonerbox.setId("summoner-box");
 						summonerbox.setMinHeight(142);
 						String tierURL = "images/tier/";
+
 						if(info.ranktier.equalsIgnoreCase("master") || info.ranktier.equalsIgnoreCase("challenger") || info.ranktier.equalsIgnoreCase("provisional")){
 							tierURL = tierURL  + info.ranktier.toLowerCase() + ".png";
 						}else{
 							tierURL = tierURL + info.ranktier.toLowerCase() + "_" + info.rankdivision.toLowerCase() + ".png";
 						}
+						if(info.ranktier != ""){
+							totalTier+= tierToInt(info.ranktier);
+						}
+						if(info.rankdivision != ""){
+							totalRank+= romanToInt(info.rankdivision);
+						}
+						totalLP+= info.ranklp;
 						System.out.println(tierURL);
 						Image image = new Image(tierURL);
 						ImageView rankView = new ImageView(image);
 						Label rankinfo = new Label(info.rankdivision.substring(0, 1).toUpperCase() + info.rankdivision.substring(1)
 						+ " " + info.ranktier + " " + info.ranklp + " LP");
-						//rankinfo.setTextFill(Color.WHITE);
 						rankinfo.setId("rank-label");
-						summonerbox.getChildren().addAll(rankView, rankinfo);
+						//Button link to opgg for each summoner
+						Button opggButton = new JFXButton("", new ImageView(new Image("/images/opgg.png")));
+						opggButton.setId("opgg-button");
+						opggButton.setPadding(new Insets(0));
+						opggButton.setOnMouseClicked(evt ->{
+							URI u = null;
+							try {
+								u = new URI("http://" + region.toLowerCase() + ".op.gg/summoner/userName=" +  URLEncoder.encode(summoner, "UTF-8"));
+							} catch (URISyntaxException e) {
+								e.printStackTrace();
+							}catch (UnsupportedEncodingException e) {
+								e.printStackTrace();
+							}
+							try {
+								java.awt.Desktop.getDesktop().browse(u);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							opggButton.setGraphic(new ImageView(new Image("/images/opggclick.png")));
+
+						});
+						opggButton.setOnMouseReleased(evt ->{
+							opggButton.setGraphic(new ImageView(new Image("/images/opgg.png")));
+
+						});
+						opggButton.setOnMouseEntered(evt ->{
+							opggButton.setGraphic(new ImageView(new Image("/images/opgghover.png")));
+
+						});
+						opggButton.setOnMouseExited(evt ->{
+							opggButton.setGraphic(new ImageView(new Image("/images/opgg.png")));
+						});
+						summonerbox.getChildren().addAll(rankView, rankinfo, opggButton);
+						StackPane.setAlignment(opggButton, Pos.TOP_RIGHT);
 						StackPane.setAlignment(rankinfo,  Pos.BOTTOM_CENTER);
 						centerpane.getChildren().add(summonerbox);
 					}
 				}
+				/* Setting up bottom pane averages */
+				if(totalSummoners != 0){
+					VBox bottomBox = new VBox();
+					bottomBox.setAlignment(Pos.TOP_CENTER);
+
+					double averageWinRate = totalWinRate / (totalChampions - emptyWinLosses);
+					Label averageWinRateLabel = new Label("Average Win Rate: " + String.format("%.2f", averageWinRate*100) + "%");
+					averageWinRateLabel.setId("summoner-label");
+					int averageTier = totalTier / totalSummoners;
+					int averageRank = totalRank / totalSummoners;
+					int averageLP = totalLP / totalSummoners;
+					Label averageRankLabel = new Label("Average Rank: " + intToTier(averageTier).toUpperCase() + " " + intToRoman(averageRank).toUpperCase() + " " + averageLP + " LP");
+					averageRankLabel.setId("summoner-label");
+					bottomBox.getChildren().add(averageWinRateLabel);
+					bottomBox.getChildren().add(averageRankLabel);
+					bottompane.getChildren().add(bottomBox);
+				}
+
 			});
 
 			/* Clear all current input for the device */
@@ -412,9 +554,11 @@ public class QuickStatsController implements Initializable {
 				champ4box.setValue(null);
 				champ5box.setValue(null);
 				fetchButton.fire();
+				bottompane.getChildren().clear();
+				masteryImages = new Image[5];
 			});
 
-			BorderPane.setMargin(leftpane, new Insets(20));
+			BorderPane.setMargin(leftpane, new Insets(20, 20, 0, 20));
 			HBox hButtonBox = new HBox();
 			hButtonBox.setSpacing(5);
 			Random rand = new Random();
@@ -428,6 +572,8 @@ public class QuickStatsController implements Initializable {
 			mainpane.setLeft(leftpane);
 			mainpane.setRight(rightpane);
 			mainpane.setCenter(centerpane);
+			mainpane.setBottom(bottompane);
+
 
 		} catch (Exception e) {
 			System.out.println("Exception occurred in Initialize");
@@ -449,35 +595,38 @@ public class QuickStatsController implements Initializable {
 	 * @param header text for dialog title
 	 * @param message text for dialog body
 	 * @param icon image for right side */
-	public void createDialog(String header, String message, Image background, JFXButton button){
+	public JFXDialog createDialog(String header, String message, Image background, JFXButton button){
 		if(dialogShowing){ // Don't display multiple dialogs
-			return;
+			return null;
 		}
 		dialogShowing = true;
 		JFXDialog dialog = new JFXDialog();
 		JFXDialogLayout dialogLayout = new JFXDialogLayout();
-		Label headerLabel = new Label(header);
-		headerLabel.setId("header-label");;
-		headerLabel.setAlignment(Pos.CENTER);
-		HBox headerbox = new HBox();
-
-		headerbox.getChildren().add(headerLabel);
-		headerbox.setAlignment(Pos.CENTER);
-		//dialogLayout.setHeading(headerbox);
+		if(header != null){
+			Label headerLabel = new Label(header);
+			headerLabel.setId("header-label");;
+			headerLabel.setAlignment(Pos.CENTER);
+			HBox headerbox = new HBox();
+			headerbox.getChildren().add(headerLabel);
+			headerbox.setAlignment(Pos.CENTER);
+			dialogLayout.setHeading(headerbox);
+		}
 
 		BorderPane mainbody = new BorderPane();
 		mainbody.setMinSize(800,  400);
-		Label messageLabel = new Label(message);
+		if(message != null){
+			Label messageLabel = new Label(message);
+			mainbody.setCenter(messageLabel);
+			BorderPane.setAlignment(messageLabel, Pos.CENTER_LEFT);
+		}
 
 		dialogLayout.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.NO_REPEAT, 
 				BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, new BackgroundSize(750, 400, false, false, true, true))));
-		mainbody.setCenter(messageLabel);
-		BorderPane.setAlignment(messageLabel, Pos.CENTER_LEFT);
+
 		//mainbody.setRight(new ImageView(icon));
 		if(button != null){
 			mainbody.setBottom(button);
 		}
-		dialogLayout.setHeading(headerbox);
 		dialogLayout.setBody(mainbody);
 		dialog.requestFocus();
 		dialog.setContent(dialogLayout);
@@ -487,7 +636,75 @@ public class QuickStatsController implements Initializable {
 		dialog.setOnDialogClosed(event ->{
 			dialogShowing = false;
 		});
+		return dialog;
 	}
+
+	/** Creates a dialog for the masterypoints.com profile */
+	public void createURLDialog(String header, String message, int arrayLoc, String imgURL, JFXButton button){
+		if(dialogShowing){ // Don't display multiple dialogs
+			return;
+		}
+		dialogShowing = true;
+		JFXDialog dialog = new JFXDialog();
+		JFXDialogLayout dialogLayout = new JFXDialogLayout();
+		if(header != null){
+			Label headerLabel = new Label(header);
+			headerLabel.setId("header-label");;
+			headerLabel.setAlignment(Pos.CENTER);
+			HBox headerbox = new HBox();
+			headerbox.getChildren().add(headerLabel);
+			headerbox.setAlignment(Pos.CENTER);
+			dialogLayout.setHeading(headerbox);
+		}
+		BorderPane mainbody = new BorderPane();
+
+		Label messageLabel = new Label("Loading...");
+		mainbody.setCenter(messageLabel);
+		BorderPane.setAlignment(messageLabel, Pos.CENTER);
+
+		ImageView masteryView = new ImageView();
+		masteryView.setImage(new Image("images/loading.gif"));
+		if(masteryImages[arrayLoc] == null){ //masteryImage array loc not set yet
+			final Thread thread = new Thread(){
+				public void run(){
+					updateImage(imgURL);
+					Platform.runLater(() -> {
+						masteryView.setImage(currentMasteryImage);
+						mainbody.setCenter(masteryView);
+					});
+					masteryImages[arrayLoc] = currentMasteryImage;
+					System.out.println("completed task");
+				}
+			};
+			thread.start();
+
+		}else{
+			masteryView.setImage(masteryImages[arrayLoc]);
+			mainbody.setCenter(masteryView);
+		}
+		mainbody.setMinSize(400,  120);
+
+		if(button != null){
+			mainbody.setBottom(button);
+			BorderPane.setAlignment(button, Pos.CENTER);
+		}
+		dialogLayout.setStyle("-fx-background-color: rgb(0, 0, 0)");
+		dialogLayout.setBody(mainbody);
+		dialog.requestFocus();
+		dialog.setContent(dialogLayout);
+		dialog.setTransitionType(DialogTransition.CENTER);
+		dialog.show((StackPane) mainpane.getParent());
+		dialog.setOnDialogClosed(event ->{
+			dialogShowing = false;
+		});
+	}
+
+	/** Called by thread process to prevent GUI from freezing in masterypoints dialog*/
+	public void updateImage(String url){
+		currentMasteryImage = new Image(url);
+	}
+
+
 	/** Capitalize the first letter of all words in a given string. */
 	public static String capitalize(String text){
 		String c = (text != null)? text.trim() : "";
@@ -499,11 +716,13 @@ public class QuickStatsController implements Initializable {
 		return result.trim();
 	}
 
-	/** Try to initialize LeagueData with proper Riot Directory */
-	public void initializeLeagueData(){
+	/** Try to initialize LeagueData with proper Riot Directory 
+	 * @throws IOException 
+	 * @throws MalformedURLException */
+	public void initializeLeagueData() throws MalformedURLException, IOException{
 		try{
 			api.setRegion(Region.valueOf(region));
-			data = new LeagueData(riotDirectory);
+			data = new LeagueData(riotDirectory, ImageIO.read(this.getClass().getResource("/images/blankimg.jpg")));
 			System.out.println("data success");
 			if(data.champIcons == null || data.champSplashArt == null){
 				riotDirectoryDialog();
@@ -583,7 +802,13 @@ public class QuickStatsController implements Initializable {
 			selectDir.setDisable(true);
 			messageLabel.setText("Please wait...");
 			riotDirectory = getRiotDirectory();
-			initializeLeagueData();
+			try {
+				initializeLeagueData();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			dialog.close();
 		});
 		mainbody.setBottom(selectDir);
@@ -597,12 +822,10 @@ public class QuickStatsController implements Initializable {
 	}
 
 
-	/**
-	 * Create and display JFXDialogs for different Riot API error codes.
+	/** Create and display JFXDialogs for different Riot API error codes.
 	 * @param e error.
 	 */
 	public void handleRiotException(RiotApiException e, String name){
-
 		System.out.println(e.getErrorCode());
 		if(e.getErrorCode() == 601){
 			createDialog("YOU NEED A MAP", "There's an I/O exception.\n"
@@ -656,6 +879,84 @@ public class QuickStatsController implements Initializable {
 					+ "\nGood Luck.",
 					new Image("/images/rammus.jpg"), null);
 		}
+	}
+
+	/** Return an integer value (low rank to high rank) for a rank string. */
+	public int tierToInt(String rank){
+		int n = -1;
+		if(rank.equalsIgnoreCase("provisional")){
+			n = 0;
+		}else if(rank.equalsIgnoreCase("bronze")){
+			n = 1;
+		}else if(rank.equalsIgnoreCase("silver")){
+			n = 2;
+		}else if(rank.equalsIgnoreCase("gold")){
+			n = 3;
+		}else if(rank.equalsIgnoreCase("platinum")){
+			n = 4;
+		}else if(rank.equalsIgnoreCase("diamond")){
+			n = 5;
+		}else if(rank.equalsIgnoreCase("master")){
+			n = 6;
+		}else if(rank.equalsIgnoreCase("challenger")){
+			n = 7;
+		}
+		return n;
+	}
+	/** Return an string value (low rank to high rank) for a int rank (1-7). */
+	public String intToTier(int n){
+		String rank = "";
+		if(n == 0){
+			rank = "provisional";
+		}else if(n == 1){
+			rank = "bronze";
+		}else if(n == 2){
+			rank = "silver";
+		}else if(n == 3){
+			rank = "gold";
+		}else if(n == 4){
+			rank = "platinum";
+		}else if(n == 5){
+			rank = "diamond";
+		}else if(n == 6){
+			rank = "master";
+		}else if(n == 7){
+			rank = "challenger";
+		}
+		return rank;
+	}
+	/** Return an integer value (1-5) from roman numeral rank. */
+	public int romanToInt(String roman){
+		int n = 0;
+		if(roman.equalsIgnoreCase("i")){
+			n = 1;
+		}else if(roman.equalsIgnoreCase("ii")){
+			n = 2;
+		}else if(roman.equalsIgnoreCase("iii")){
+			n = 3;
+		}else if(roman.equalsIgnoreCase("iv")){
+			n = 4;
+		}else if(roman.equalsIgnoreCase("v")){
+			n = 5;
+		}
+		return n;
+	}
+
+	/** Return a roman numeral rank from integer value (1-5). */
+	public String intToRoman(int n){
+		String roman = "";
+		if(n == 1){
+			roman = "I";
+		}else if(n == 2){
+			roman = "II";
+		}else if(n == 3){
+			roman = "III";
+		}else if(n == 4){
+			roman = "IV";
+		}else if(n == 5){
+			roman = "V";
+		}
+		return roman;
 	}
 
 	/** Create toolbar window buttons */
@@ -729,20 +1030,46 @@ public class QuickStatsController implements Initializable {
 							}
 						}
 					});
+					JFXButton reportbutton = new JFXButton("Email Me");
+					reportbutton.setId("website-button");
+					reportbutton.setOnAction(new EventHandler<ActionEvent>(){
+						@Override
+						public void handle(ActionEvent actionEvent) {
+							Desktop desktop = Desktop.getDesktop();
+							String message = "mailto:jacobwwebber@gmail.com?subject=LoLQuickStats%20Bug%20Report";
+							URI uri = URI.create(message);
+							try {
+								desktop.mail(uri);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					});
+					
+					JFXButton donateButton = new JFXButton("Be My Hero");
+					donateButton.setId("website-button");
+					donateButton.setOnAction(new EventHandler<ActionEvent>(){
+						@Override
+						public void handle(ActionEvent actionEvent) {
+							URI u = null;
+							try {
+								u = new URI("https://www.paypal.me/jacobwwebber");
+							} catch (URISyntaxException e) {
+								e.printStackTrace();
+							}
+							try {
+								java.awt.Desktop.getDesktop().browse(u);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					});
 
 					description.setPadding(new Insets(20));
 					description.setAlignment(Pos.CENTER);
 					description.setId("info-text");
-					Label instructions = new Label("1) Wait for your teammates to select or lock in their champion of choice.\n"
-							+ "    While waiting, you can manually enter summoner names and champions as they lock in.\n"
-							+ "2) Otherwise, use ctrl + printscreen to get a screenshot of your League of Legends lobby.\n"
-							+ "3) Press Import Clipboard to pull the screenshot from your clipboard and analyze.\n"
-							+ "4) Fix errors in the name parsing, if any (OCR is finicky).\n"
-							+ "5) Press Fetch Data to get stats about your team and the champions they're playing.\n"
-							+ "    You can Fetch Data for any amount of information filled out about your team,\n"
-							+ "    so tier, rank, and division are available at any time during your game lobby.");
-					instructions.setId("about-text");
-					instructions.setAlignment(Pos.CENTER);
+
 					JFXTabPane tabPane = new JFXTabPane();
 					tabPane.setMinHeight(500);
 					VBox aboutbox = new VBox();
@@ -753,20 +1080,103 @@ public class QuickStatsController implements Initializable {
 
 					aboutbox.setBackground(new Background(new BackgroundImage(new Image("/images/background2.jpg"), BackgroundRepeat.NO_REPEAT, 
 							BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, new BackgroundSize(750, 400, false, false, true, true))));
-					//Image about = new Image("/images/about.png");
-					//aboutbox.getChildren().addAll(new ImageView(about));
+				
 					Tab abouttab = new Tab("About");
 					abouttab.setContent(aboutbox);
 					Tab instructionstab = new Tab("Instructions");
-					VBox instructionsbox = new VBox();
-					instructionsbox.setPadding(new Insets(10, 10, 10, 10));
-					instructionsbox.setAlignment(Pos.BOTTOM_CENTER);
-					instructionsbox.setBackground(new Background(new BackgroundImage(new Image("/images/ryze.jpg"), BackgroundRepeat.NO_REPEAT, 
+					StackPane instructionspane = new StackPane();
+					instructionspane.setBackground(new Background(new BackgroundImage(new Image("/images/ryze.png"), BackgroundRepeat.NO_REPEAT, 
 							BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, new BackgroundSize(750, 400, false, false, true, true))));
+					VBox instructionsbox = new VBox(40);
+					instructionsbox.setPadding(new Insets(200, 10, 10, 10));
+					instructionsbox.setAlignment(Pos.BOTTOM_CENTER);
+					ScrollPane sp = new ScrollPane();
+					instructionspane.getChildren().addAll(sp);
+					sp.setMaxHeight(550);
+					VBox.setVgrow(sp, Priority.ALWAYS);
+					sp.setFitToHeight(true);
+					sp.setFitToWidth(true);
+					sp.setContent(instructionsbox);
+					sp.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+					HBox instr1box = new HBox(10);
+					Label instr = new Label("Manually enter summoner names and champions as they lock in,\n"
+							+ "or use alt + printscreen to get a screenshot of your League of Legends lobby.\n"
+							+ "Press Import Clipboard to pull the screenshot from your clipboard and analyze.\n"
+							+ "Fix errors in the name parsing, if any (OCR is finicky).\n");
+					instr.setId("about-text");
+					instr.setAlignment(Pos.CENTER);
+					ImageView instr1view = new ImageView(new Image("/images/instr1.png"));
+					instr1view.setEffect(new DropShadow());
+					instr1box.getChildren().addAll(instr1view, instr);
+					HBox instr2box = new HBox(10);
+					Label instr2 = new Label("Press Fetch Data to get stats about your team and the champions they're playing.\n"
+							+ "You can Fetch Data for any amount of information filled out about your team,\n"
+							+ "so tier, rank, and division are available at any time during your game lobby.");
+					instr2.setId("about-text");
+					instr2.setAlignment(Pos.CENTER);
+					ImageView instr2view = new ImageView(new Image("/images/instr2.png"));
+					instr2view.setEffect(new DropShadow());
+					instr2box.getChildren().addAll(instr2view, instr2);				
+					VBox instr3box = new VBox(10);
+					instr3box.setAlignment(Pos.CENTER);
+					Label instr3 = new Label("OP.GG buttons link to the summoner's OP.GG for detailed game stats.\n"
+							+ "Champion mastery buttons link to their MasteryPoints profile summary.\n"
+							+ "Average winrate and rank for your team are listed at the bottom.");
+					instr3.setId("about-text");
+					instr3.setAlignment(Pos.CENTER);
+					HBox instr3textbox = new HBox();
+					instr3textbox.setMinHeight(100);
+					instr3textbox.setAlignment(Pos.CENTER);
+					instr3textbox.getChildren().add(instr3);
+					ImageView instr3view = new ImageView(new Image("/images/instr3.png"));
+					instr3view.setEffect(new DropShadow());
+					instr3box.getChildren().addAll(instr3textbox, instr3view);
+					HBox instr4box = new HBox(10);
+					Label instr4 = new Label("Press Clear to empty all fields and current fetched information.\n"
+							+ "Import Clipboard will not overwrite existing fields, so clear before importing.");
+					instr4.setId("about-text");
+					instr4.setAlignment(Pos.CENTER);
+					ImageView instr4view = new ImageView(new Image("/images/instr4.png"));
+					instr4view.setEffect(new DropShadow());
+					instr4box.getChildren().addAll(instr4view, instr4);
+					instructionsbox.getChildren().addAll(instr1box, instr2box, instr4box, instr3box);
+					instructionstab.setContent(instructionspane);
+					
+					/* Bug report tab */
+					VBox reportbox = new VBox(30);
+					reportbox.setAlignment(Pos.TOP_CENTER);
+					reportbox.setPadding(new Insets(10, 10, 10, 10));
+					Label errorLabel = new Label("Found a bug?\n"
+							+ "Email me at jacobwwebber@gmail.com with a description.\n"
+							+ "I'll do what I can to hunt it down.");
+					errorLabel.setId("about-text");
+					reportbox.getChildren().addAll(errorLabel, reportbutton);
 
-					instructionsbox.getChildren().add(instructions);
-					instructionstab.setContent(instructionsbox);
-					tabPane.getTabs().addAll(abouttab, instructionstab);
+					reportbox.setBackground(new Background(new BackgroundImage(new Image("/images/khazix.jpg"), BackgroundRepeat.NO_REPEAT, 
+							BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, new BackgroundSize(750, 400, false, false, true, true))));
+				
+					Tab reporttab = new Tab("Bug Report");
+					reporttab.setContent(reportbox);
+					
+					
+					/* Donate tab */
+					VBox donatebox = new VBox(30);
+					donatebox.setAlignment(Pos.TOP_CENTER);
+					donatebox.setPadding(new Insets(10, 10, 10, 10));
+					Label donateLabel = new Label("Was LoLQuickStats useful?\n"
+							+ "A Teemo dies to Darius dunk for every donation.\n"
+							+ "Help eradicate Teemo from the Rift.\n"
+							+ "Help me move out of my mom's basement.");
+					donateLabel.setId("about-text");
+					donatebox.getChildren().addAll(donateLabel, donateButton);
+
+					donatebox.setBackground(new Background(new BackgroundImage(new Image("/images/darius.jpg"), BackgroundRepeat.NO_REPEAT, 
+							BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, new BackgroundSize(750, 400, false, false, true, true))));
+				
+					Tab donatetab = new Tab("Donate");
+					donatetab.setContent(donatebox);
+					
+					tabPane.getTabs().addAll(abouttab, instructionstab, reporttab, donatetab);
 
 					dialog.requestFocus();
 					dialog.setContent(tabPane);
@@ -774,6 +1184,12 @@ public class QuickStatsController implements Initializable {
 					dialog.show((StackPane) mainpane.getParent());
 				}
 			});
+
+			/* Display about dialog on first open */
+			if(firstOpen){
+				firstOpen = false;
+				aboutBtn.fire();
+			}
 			/* Create close button */
 			JFXButton closeBtn = new JFXButton("X");
 			closeBtn.setId("close-button");

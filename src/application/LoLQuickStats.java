@@ -16,10 +16,10 @@ public class LoLQuickStats extends Application {
 	public void start(Stage theStage) throws Exception {
 		Stage stage = theStage;
 		stage.setWidth(1280);
-		stage.setHeight(800);
+		stage.setHeight(850);
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.getIcons().add(new Image(this.getClass().getResourceAsStream("/images/LoLQuickStats.png")));
-		theStage.setTitle("LoL QuickStats");
+		theStage.setTitle("LoL Quick Stats");
 
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/QuickStats.fxml"));		
 		Parent root = (Parent)loader.load();

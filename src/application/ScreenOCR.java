@@ -27,6 +27,7 @@ import com.jhlabs.image.ThresholdFilter;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import net.sourceforge.tess4j.util.LoadLibs;
 
 /** 
  * Class for performing OCR and other pixel comparisons on League screenshots.
@@ -41,6 +42,9 @@ public class ScreenOCR {
 	ScreenOCR(){
 		List<String> configs = new ArrayList<String>();
 		configs.add("digits");
+		
+		File tessDataFolder = LoadLibs.extractTessResources("tessdata");
+		tesseract.setDatapath(tessDataFolder.getAbsolutePath());
 		tesseract.setConfigs(configs);
 		tesseract.setPageSegMode(7); //  Treat the image as a single text line.
 		tesseract.setTessVariable("load_system_dawg", "false");
@@ -155,7 +159,7 @@ public class ScreenOCR {
 	public static ArrayList<BufferedImage> screenChampions(Image imageFile) throws IOException{
 		BufferedImage screenshot = toBufferedImage(imageFile);
 		screenshot = convertCMYK2RGB(screenshot);
-		ImageIO.write(screenshot, "jpg", new File("C:\\Users\\Jake\\Pictures\\league\\testingthis.jpg"));
+		//ImageIO.write(screenshot, "jpg", new File("C:\\Users\\Jake\\Pictures\\league\\testingthis.jpg"));
 
 		/* Image pixel parsing definitions */
 		int width = screenshot.getWidth(); 

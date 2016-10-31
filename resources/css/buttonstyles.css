@@ -10,6 +10,32 @@
 #link-button:hover{
     -fx-background-color: #00cc99;
 }
+#link-mastery-button{
+    -fx-padding: 0.7em 0.57em;
+    -fx-font-size: 14px;
+    -fx-button-type: RAISED;
+    -fx-background-color:  #008060;
+    -fx-pref-width: 397;
+    -fx-pref-height: 30;
+    -fx-text-fill: WHITE;
+}
+#link-mastery-button:hover{
+    -fx-background-color: #00cc99;
+}
+#opgg-button{
+    -fx-focus-color: transparent;
+    -fx-background-color:transparent
+}
+#opgg-button:pressed{
+    -fx-background-color: transparent;
+}
+#mastery-button{
+    -fx-focus-color: transparent;
+    -fx-background-color:transparent
+}
+#mastery-button:pressed{
+    -fx-background-color: transparent;
+}
 
 #website-button{
    /*  -fx-padding: 0.7em 0.57em;*/
