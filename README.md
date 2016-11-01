@@ -2,7 +2,7 @@
 ###Current Version: 1.0
 <i>Instant stats for your League of Legends team lobby before you load in game, just a few clicks away.</i>
 
-Using Google's Tesseract OCR Enjine and image comparing, LoLQuickStats retrieves summoner names and selected champions from a League of Legends lobby screenshot. You can quickly look up your team's winrates, mastery levels, and more for the champions they're playing. All before you load into the game.
+Using Google's Tesseract OCR Engine and image comparing, LoLQuickStats retrieves summoner names and selected champions from a League of Legends lobby screenshot. You can quickly look up your team's winrates, mastery levels, and more for the champions they're playing. All before you load into the game.
 
 ##[DOWNLOAD HERE](https://github.com/jakewebber/LoLQuickStats/blob/master/LoLQuickStats.zip?raw=true)
 and run `LoLQuickStats.jar`
