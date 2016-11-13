@@ -1,3 +1,5 @@
+Update for the upcoming season and Alpha Client changes in progress.
+
 <img align="center" src="https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/banner.png">
 ###Current Version: 1.0
 <i>Instant stats for your League of Legends team lobby before you load in game, just a few clicks away.</i>
