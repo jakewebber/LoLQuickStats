@@ -8,6 +8,7 @@ Using Google's Tesseract OCR Engine and image comparing, LoLQuickStats retrieves
 
 ##[DOWNLOAD HERE](https://github.com/jakewebber/LoLQuickStats/blob/master/LoLQuickStats.zip?raw=true)
 and run `LoLQuickStats.jar`
+<img align="center" src=https://github.com/jakewebber/LoLQuickStats/blob/master/demo1.gif?raw=true>
 
 #Instructions
 - Have LoLQuickStats open and use  `alt + printscreen` to capture your current game lobby to the clipboard.
@@ -16,15 +17,7 @@ and run `LoLQuickStats.jar`
 - Fetch data to see instant stats on each team member with the champion they're playing.
 - Use OP.GG and Mastery Level links for more in-depth stats on specific summoners.
 
-<img align="center" src=https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/screenshot2.jpg>
  
-
-<img align="center" src=https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/screenshot1.jpg>
- 
-
-<img align="center" src=https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/screenshot3.jpg>
-
-
 
 #Credits
 
