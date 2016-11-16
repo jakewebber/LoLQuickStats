@@ -4,7 +4,7 @@ Update for the upcoming season and Alpha Client changes in progress.
 ###Current Version: 1.0
 <i>Instant stats for your League of Legends team lobby before you load in game, just a few clicks away.</i>
 
-LoLQuickStats retrieves summoner names and selected champions from a League of Legends lobby screenshot. You can quickly look up your team's winrates, mastery levels, and more for the champions they're playing. All before you load into the game. It's faster than any other tool for looking up complete team stats with champion-specific information.
+LoLQuickStats is faster than any other tool for looking up complete team stats with champion-specific information. It retrieves summoner names and selected champions from a League of Legends lobby screenshot and quickly looks your team's winrates, mastery levels, and more for the champions they're playing -- **before you load into the game.**
 
 ##[DOWNLOAD HERE](https://github.com/jakewebber/LoLQuickStats/blob/master/LoLQuickStats.zip?raw=true)
 and run `LoLQuickStats.jar`
