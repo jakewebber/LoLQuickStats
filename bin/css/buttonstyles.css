@@ -49,15 +49,13 @@
     -fx-background-color: #00cc99;
 }
 
-
-
 #reset-button{
    /*  -fx-padding: 0.7em 0.57em;*/
     -fx-font-size: 18px;
     -fx-button-type: RAISED;
     -fx-background-color: #b22222;
-    -fx-pref-width: 402;
-    -fx-pref-height: 25;
+    -fx-pref-width: 225;
+    -fx-pref-height: 10;
     -fx-text-fill: WHITE;
 }
 #reset-button:hover{
@@ -65,26 +63,26 @@
 }
 
 #analyze-button{
-    -fx-padding: 0.7em 0.57em;
+   /* -fx-padding: 0.7em 0.57em;*/
     -fx-font-size: 18px;
     -fx-button-type: RAISED;
-    -fx-background-color: #002266;
-    -fx-pref-width: 200;
+    -fx-background-color:rgb(89, 146, 160);
+    -fx-pref-width: 110;
     -fx-text-fill: WHITE;
 }
 #analyze-button:hover{
-    -fx-background-color: royalblue;
+    -fx-background-color: #6fb8c6;
 }
 #fetch-button{
-    -fx-padding: 0.7em 0.57em;
+   /* -fx-padding: 0.7em 0.57em;*/
     -fx-font-size: 18px;
     -fx-button-type: RAISED;
-    -fx-background-color:  #b38600;
-    -fx-pref-width: 200;
+    -fx-background-color: rgb(89, 146, 160);
+    -fx-pref-width: 110;
     -fx-text-fill: WHITE;
 }
 #fetch-button:hover{
-    -fx-background-color: #e6ac00;
+    -fx-background-color: #6fb8c6;
 }
 
 /*  about button */
@@ -93,7 +91,7 @@
     -fx-font-size: 16px;
     -fx-button-type: RAISED;
     -fx-background-color: red;
-    -fx-pref-width: 200;
+    -fx-pref-width: 120;
     -fx-text-fill: WHITE;
 }
 #directory-button:hover{
@@ -104,14 +102,14 @@
 	-fx-padding: 4;
 	-fx-font-size: 15px;
 	-fx-button-type: RAISED;
-	-fx-background-color: rgb(128,128,128, .5);
+	-fx-background-color: #606060;
 
 	-fx-pref-width: 50;
 	-fx-text-fill: black;
 }
 #about-button:hover{
 	-fx-button-type: RAISED;
-	-fx-background-color: rgb(150,150,150, 1);
+	-fx-background-color: #999b9b;
 	-fx-pref-width: 50;
 	-fx-text-fill: black;
 }
@@ -138,14 +136,14 @@
 	-fx-padding: 4;
 	-fx-font-size: 14px;
 	-fx-button-type: RAISED;
-	-fx-background-color: rgbA(253, 228, 0, .5);
+	-fx-background-color: #606060;
 	-fx-pref-width: 50;
 	-fx-text-fill: black;
 }
 #minimize-button:hover{
 	-fx-font-size: 14px;
 	-fx-button-type: RAISED;
-	-fx-background-color: rgbA(255, 235, 40, 1);
+	-fx-background-color: #999b9b;
 	-fx-pref-width: 50;
 	-fx-text-fill: black;
 }

@@ -15,7 +15,6 @@
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/jul-to-slf4j-1.7.13.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/lept4j-1.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/logback-classic-1.1.3.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/logback-core-1.1.3.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/platform.jar"/>
@@ -24,5 +23,14 @@
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/tess4j-3.0.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/xmlgraphics-commons-1.5.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/gson-2.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/httpclient-4.3.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/log4j-api-2.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/log4j-api-2.7-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/log4j-core-2.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jake/Workspace/LoLQuickStats/lib/orianna-2.4.6.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://meraki-analytics.github.io/Orianna/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

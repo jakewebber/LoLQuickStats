@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Sealed: true
 Main-Class: application.ShouldIDodge
+SplashScreen-Image: resources/images/LoLQuickStats.png
 Specification-Title: Java Advanced Imaging Image I/O Tools
 Specification-Version: 1.1
 Specification-Vendor: Sun Microsystems, Inc.

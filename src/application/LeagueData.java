@@ -19,29 +19,29 @@ import javax.swing.ImageIcon;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import net.rithms.riot.api.*;
-import net.rithms.riot.dto.Summoner.Summoner;
 import net.sourceforge.tess4j.TesseractException;
-import net.rithms.riot.dto.ChampionMastery.ChampionMastery;
-import net.rithms.riot.dto.League.League;
-import net.rithms.riot.dto.League.LeagueEntry;
-import net.rithms.riot.dto.Static.*;
-import net.rithms.riot.dto.Static.Champion;
-import net.rithms.riot.dto.Stats.AggregatedStats;
-import net.rithms.riot.dto.Stats.ChampionStats;
-import net.rithms.riot.dto.Stats.PlayerStatsSummary;
-import net.rithms.riot.dto.Stats.PlayerStatsSummaryList;
-import net.rithms.riot.dto.Stats.RankedStats;
-import net.rithms.riot.constant.PlatformId;
+
+import com.robrua.orianna.api.core.RiotAPI;
+import com.robrua.orianna.type.api.LoadPolicy;
+import com.robrua.orianna.type.api.RateLimit;
+import com.robrua.orianna.type.core.championmastery.ChampionMastery;
+import com.robrua.orianna.type.core.league.League;
+import com.robrua.orianna.type.core.league.LeagueEntry;
+import com.robrua.orianna.type.core.staticdata.Champion;
+import com.robrua.orianna.type.core.stats.AggregatedStats;
+import com.robrua.orianna.type.core.stats.ChampionStats;
+import com.robrua.orianna.type.core.stats.PlayerStatsSummary;
+import com.robrua.orianna.type.core.stats.PlayerStatsSummaryType;
+import com.robrua.orianna.type.core.summoner.Summoner;
+import com.robrua.orianna.type.exception.APIException;
 
 public class LeagueData {
-	private static final RiotApi api = RiotAPIKey.getAPI();
-	public ChampionList champsList = new ChampionList();
-	public static AggregatedStats summonerStats = new AggregatedStats();
+	public List<Champion> champsList;
+	public static AggregatedStats summonerStats;
 	public static Map<String, Champion> champsMap;
-	public ArrayList<BufferedImage> champIcons; 
-	public ArrayList<BufferedImage> champSplashArt; 
-	public  ArrayList<String> champNames; // All champion names
+	public ArrayList<BufferedImage> champIcons = new ArrayList<BufferedImage>(); 
+	public ArrayList<BufferedImage> champSplashArt = new ArrayList<BufferedImage>(); 
+	public static ArrayList<String> champNames; // All champion names
 	public  ArrayList<String> summonerChampNames;
 	public  ArrayList<BufferedImage> summonerChampIcons;
 	public  ArrayList<Integer> summonerChampIndices;
@@ -50,21 +50,24 @@ public class LeagueData {
 	public static ScreenOCR ocr = new ScreenOCR();
 	public static String riotDirectory;
 
+
 	/** Constructor - Initialize variables 
 	 * @throws IOException 
 	 * @throws TesseractException */
-	public LeagueData(String riotDir, BufferedImage blankImg) throws RiotApiException{
+	public LeagueData(String riotDir, BufferedImage blankImg){
+		RiotAPIKey.setKey();
+		RiotAPI.setLoadPolicy(LoadPolicy.UPFRONT);
+		RiotAPI.setRateLimit(new RateLimit(25, 10), new RateLimit(500, 600));
 		riotDirectory = riotDir;
-		this.champsList = 		api.getDataChampionList(); //get list of all champions
-		LeagueData.champsMap =	champsList.getData();
+		LeagueData.champNames = 		getChampOrder();
+		this.champsList = 		RiotAPI.getChampions(); //get list of all champions
 		this.champIcons = 		getChampIcons(blankImg);
-		this.champSplashArt = 	getChampSplashArt();
-		this.champNames = 		getChampOrder();
 	}
 
-	/** Updates summonerChampIcons and summonerNames with values from the screenshot */
+	/** Updates summonerChampIcons and summonerNames with values from the screenshot 
+	 * @return double average difference value in comparisons (lower = better) */
 	@SuppressWarnings("static-access")
-	public void screenImage(java.awt.Image screenshot) throws IOException, TesseractException{
+	public double screenImage(java.awt.Image screenshot) throws IOException, TesseractException{
 		this.summonerChampIcons = 		ocr.screenChampions(screenshot);
 		this.summonerNames = 			ocr.screenSummoners(screenshot);
 		this.summonerChampNames = 		new  ArrayList<String>();
@@ -74,7 +77,7 @@ public class LeagueData {
 
 		/* Compare each summoner champion icon to the champIcons for best match */
 		System.out.println("champ icons: " + summonerChampIcons.size());
-		for(BufferedImage image : summonerChampIcons){
+		for(BufferedImage image : summonerChampIcons){ 
 			int[] values = ScreenOCR.compareImages(champIcons, image);
 			this.summonerChampIndices.add(values[0]);
 			this.summonerChampAccuracies.add(values[1]);
@@ -87,6 +90,13 @@ public class LeagueData {
 				System.out.println(champNames.get(location));
 			}
 		}
+
+		double avgDiff = 0;
+		for(double val : summonerChampAccuracies){ // get average image difference
+			avgDiff+= val;
+		}
+		avgDiff = avgDiff / 5;	
+		return avgDiff;
 	}
 
 
@@ -96,17 +106,22 @@ public class LeagueData {
 		File directory = new File(location);
 		File[] filelist = directory.listFiles(); //get all version folders between projects and assets.
 		int index = getLatestModified(filelist);
-		location = filelist[index] + "/deploy/assets/images/champions/";
-
+		if(index != -1){
+			location = filelist[index] + "/deploy/assets/images/champions/";
+		}else{
+			System.out.println("version not found");
+			return null;
+		}
 		System.out.println("Champ icons dir: " + location);
 		ArrayList<BufferedImage> champIcons = new ArrayList<BufferedImage>();
 
-		for (Map.Entry<String, Champion> entry : champsMap.entrySet()) {
+		for (String entry : LeagueData.champNames) {
+			entry = entry.replace("'", "").replace(" ", "").replace(".", "").replace("Wukong",  "MonkeyKing");
 			BufferedImage image;
 			try {
-				image = ImageIO.read(new File(location + entry.getKey() + "_Square_0.png"));
+				image = ImageIO.read(new File(location + entry + "_Square_0.png"));
 			} catch (IOException e) {
-				System.out.println("Error: Image file not found for " + entry.getKey() + "_Square_0.png");
+				System.out.println("Image file not found for " + entry + "_Square_0.png");
 				System.out.println("Method: getChampIcons");
 				return null;
 			}
@@ -122,139 +137,138 @@ public class LeagueData {
 	 * @param champion
 	 * @return SummonerInfo 				*/
 	public SummonerInfo getSummonerData(String name, String champion){
+		long startTime = System.currentTimeMillis();
+
 		if(name.equals("") && champion.equals("")){ // Empty check
 			System.out.println("getSummonerData: Nothing here");
 			return null;
 		}
-		PlatformId platformid = PlatformId.NA;
-		platformid = PlatformId.valueOf(api.getRegion().toString().toUpperCase());
-
-		Summoner summoner;
+		Summoner summoner = null;
 		SummonerInfo summonerinfo = new SummonerInfo();
-		try{
-			summoner = api.getSummonerByName(name);
-		}catch(RiotApiException e){
-			System.out.println("Riot api exception: " + e.getErrorCode() + e.getMessage());
-			summonerinfo.errorcode = e.getErrorCode();
-			e.printStackTrace();
-			return summonerinfo; // SUMMONER NOT FOUND
-		}
-		//RankedStats stats1 = api.getRankedStats(summoner.getId());
-		/* Get summoner rank, division, and LP */
-		List<League> leagues;
-		try{
-			leagues = api.getLeagueBySummoner(summoner.getId());
 
-		}catch(RiotApiException e){
-			summonerinfo.errorcode = e.getErrorCode();
-			return summonerinfo; 
+		Champion champ = null;
+		for(Champion ch : champsList){
+			if(ch.getName().equalsIgnoreCase(champion)){
+				champ = ch;
+			}
+		}
+		try{
+			summoner = RiotAPI.getSummonerByName(name);
+		}catch(APIException e){
+			summonerinfo.errorcode = ((APIException) e).getStatus().name();
+			return summonerinfo;
+		}
+
+		/* Get Ranked wins and losses */
+		try{
+			Map<PlayerStatsSummaryType, PlayerStatsSummary> statssummap = summoner.getStats();
+			PlayerStatsSummary statsummary = statssummap.get(PlayerStatsSummaryType.RankedSolo5x5);
+			summonerinfo.rankedtotalwins = statsummary.getWins();
+			summonerinfo.rankedtotallosses = statsummary.getLosses();
+		}catch(IllegalArgumentException e){
+			e.printStackTrace();
+			return summonerinfo;
+		}
+
+		/* Get summoner rank, division, and LP */
+		List<League> leagues = null;
+		try{
+			leagues = summoner.getLeagueEntries();
+		}catch(APIException e){
+			summonerinfo.errorcode = ((APIException) e).getStatus().name();
+			return summonerinfo;
 		}
 		League league = leagues.get(0);
 		List<LeagueEntry> entries = league.getEntries();
-		LeagueEntry entry = new LeagueEntry();
+		LeagueEntry entry = null;
 		for(int i = 0; i < entries.size(); i++){
-			if(Integer.valueOf((entries.get(i).getPlayerOrTeamId()))== summoner.getId()){
+			if(Integer.valueOf((entries.get(i).getID()))== summoner.getID()){
 				entry = entries.get(i);		
 			}
 		}
 		summonerinfo.summonername = name;
 		summonerinfo.champname = champion;
-		summonerinfo.ranktier = league.getTier();
+		summonerinfo.ranktier = league.getTier().name();
 		summonerinfo.rankdivision = entry.getDivision();
 		summonerinfo.ranklp = entry.getLeaguePoints();
-		System.out.println(league.getTier() + " " + entry.getDivision() + " " + entry.getLeaguePoints());
-		Champion champ = new Champion();
-		try{
-			champ = champsMap.get(champion);
 
-			ChampionMastery mastery = api.getChampionMastery(platformid, summoner.getId(), champ.getId());
-			summonerinfo.champmasterylevel = mastery.getChampionLevel();
-			summonerinfo.champmasterypoints = mastery.getChampionPoints();
-
-		}catch(RiotApiException e){
-			System.out.println("masteries not found?" + e.getErrorCode());
-			e.printStackTrace();
-			summonerinfo.errorcode = e.getErrorCode();
-			return summonerinfo; 
-		}catch(NullPointerException e){
-			summonerinfo.champmasterylevel = 0;
-			summonerinfo.champmasterypoints = 0;
-		}
-		
-		/* Getting champion specific stats past this point */
+		/* Get champion specific information on the summoner */
 		try{
-			AggregatedStats champstats = new AggregatedStats();
-			RankedStats stats = api.getRankedStats(summoner.getId());
-			List<ChampionStats> championStats = stats.getChampions();
-			for(ChampionStats champstat: championStats){
-				if(champstat.getId() == champ.getId()){
-					champstats = champstat.getStats();
+			if(!champion.equalsIgnoreCase("")){
+				ChampionMastery mastery = null;
+				try{
+					mastery = summoner.getChampionMastery(champ);
+					summonerinfo.champmasterylevel = mastery.getChampionLevel();
+					summonerinfo.champmasterypoints = mastery.getChampionPoints();
+				}catch(IllegalArgumentException e){
+					summonerinfo.champmasterylevel = 0;
+					summonerinfo.champmasterypoints = 0;
 				}
+			}else{
+				return summonerinfo;
 			}
-			summonerinfo.champgameswon = champstats.getTotalSessionsWon();
-			summonerinfo.champgameslost = champstats.getTotalSessionsLost();
-			summonerinfo.champgamestotal = champstats.getTotalSessionsPlayed();
-			summonerinfo.champavgassists = champstats.getAverageAssists();
-			summonerinfo.champavgkills = champstats.getAverageChampionsKilled();
-			summonerinfo.champavgdeaths = champstats.getAverageNumDeaths();
-		}catch(RiotApiException e){
-			System.out.println("api exception for champstats " + e.getErrorCode());
-			e.printStackTrace();
-			summonerinfo.errorcode = e.getErrorCode();
-			return summonerinfo; 
-		}catch(NullPointerException e){
-			System.out.println("getSummonerData: No champion specified for getting champstats");
+		}catch(APIException e){
+			summonerinfo.errorcode = ((APIException) e).getStatus().name();
 			return summonerinfo;
 		}
-		try{
-			PlayerStatsSummaryList statssumlist = api.getPlayerStatsSummary(summoner.getId());
-			List<PlayerStatsSummary> stats = statssumlist.getPlayerStatSummaries();
-			PlayerStatsSummary statsum = null;
-			for(PlayerStatsSummary s : stats){
-				if(s.getPlayerStatSummaryType().equalsIgnoreCase("RankedSolo5x5")){
-					statsum = s;
-				}
-			}
-			summonerinfo.rankedtotalwins = statsum.getWins();
-			summonerinfo.rankedtotallosses = statsum.getLosses();
-		}catch(RiotApiException e){
-			System.out.println("api exception for statsumlist " +e.getErrorCode());
-			e.printStackTrace();
-			summonerinfo.errorcode = e.getErrorCode();
-			return summonerinfo; 
+
+		Map<Champion, ChampionStats> stats = summoner.getRankedStats();
+		ChampionStats champstats = stats.get(champ);
+		if(champstats == null){
+			return summonerinfo;
 		}
+		summonerinfo.champgameswon = champstats.getStats().getTotalWins();
+		summonerinfo.champgameslost = champstats.getStats().getTotalLosses();
+		summonerinfo.champgamestotal = champstats.getStats().getTotalGamesPlayed();
+		summonerinfo.champavgassists = champstats.getStats().getAverageAssists();
+		summonerinfo.champavgkills = champstats.getStats().getAverageKills();
+		summonerinfo.champavgdeaths = champstats.getStats().getAverageDeaths();
 		System.out.println("Successful summonerinfo");
+
+		long endTime = System.currentTimeMillis();
+
+		long duration = (endTime - startTime);  //divide by 1000000 to get milliseconds.
+		System.out.println("Data Fetch: " + duration + " ms, " + duration / 1000 + "sec");
 		return summonerinfo;
 	}
 
-	/** Gets an ArrayList of all League splash arts. Used for GUI visuals */
+	/** Gets an ArrayList of all League splash arts. Used for GUI visuals 
 	public static ArrayList<BufferedImage> getChampSplashArt(){
 		String location = riotDirectory + "/League of Legends/RADS/projects/lol_air_client/releases/";
 		File directory = new File(location);
 		File[] filelist = directory.listFiles(); //get dynamic version folder between projects and assets.
 		int index = getLatestModified(filelist);
-
-		location = filelist[index] + "/deploy/assets/images/champions/";
-
+		if(index != -1){
+			location = filelist[index] + "/deploy/assets/images/champions/";
+		}else{
+			System.out.println("version not found");
+			return null;
+		}
 
 		ArrayList<BufferedImage> champIcons = new ArrayList<BufferedImage>();
-		for (Map.Entry<String, Champion> entry : champsMap.entrySet()) {
+		for (String name : LeagueData.champNames) {
 			BufferedImage image;
 			try {
-				image = ImageIO.read(new File(location + entry.getKey() + "_Splash_Centered_0.jpg"));
-				image = convertCMYK2RGB(toBufferedImage(image.getSubimage( 200, 150, 800, 150).getScaledInstance(600, 100, Image.SCALE_SMOOTH)));
+				image = ImageIO.read(new File(location + name.replace(" ", "") + "_Splash_Centered_0.jpg"));
+				image = convertCMYK2RGB(toBufferedImage(image.getSubimage( 200, 150, 800, 100).getScaledInstance(800, 100, Image.SCALE_SMOOTH)));
 
 			} catch (IOException e) {
-				System.out.println("Error: Image file not found for " + entry.getKey() + "_Splash_Centered_0.jpg");
+				System.out.println("Error: Image file not found for " + name.replace(" ", "") + "_Splash_Centered_0.jpg");
 				System.out.println("Method: getChampSplashArt");
 				return null;
 			}
 			champIcons.add(image);
 		}
 		return champIcons;
-	}
+	}*/
 
+	/** Return a splash art image for the given champion */
 	public static javafx.scene.image.Image getChampSplashArt(String champion){
+		/* Format champion String for Riot file name conventions */
+		champion = champion.replace("'", "").replace(" ", "").replace(".", "");
+		if(champion.equalsIgnoreCase("wukong")){
+			champion = "MonkeyKing";
+		}
 		String location = riotDirectory + "/League of Legends/RADS/projects/lol_air_client/releases/";
 		File directory = new File(location);
 		File[] filelist = directory.listFiles(); //get dynamic version folder between projects and assets.
@@ -264,33 +278,32 @@ public class LeagueData {
 			return null;
 		}
 		String url = location + champion + "_Splash_Centered_0.jpg";
-
 		System.out.println(url);
 		javafx.scene.image.Image image;
 		image = new javafx.scene.image.Image (url);
 
-		//image = convertCMYK2RGB(toBufferedImage(image.getSubimage( 200, 150, 800, 150).getScaledInstance(600, 100, Image.SCALE_SMOOTH)));
-		WritableImage croppedImage = new WritableImage(image.getPixelReader(), 200, 150, 800, 200);
-		croppedImage = scale(croppedImage, 600, 136, false);
+		WritableImage croppedImage = new WritableImage(image.getPixelReader(), 100, 150, 1100, 175);
+		croppedImage = scale(croppedImage, 800, 100, false);
 		return croppedImage;
 	}
 
 	/** Return an arraylist of the champion names */
 	public static ArrayList<String> getChampOrder(){
 		ArrayList<String> champOrder = new ArrayList<String>();
-		for (Map.Entry<String, Champion> entry : champsMap.entrySet()) {
-			champOrder.add(entry.getKey());
+		for (Champion champ : RiotAPI.getChampions()) {
+			String name = champ.getName();
+			champOrder.add(name);
 		}
+
+		champOrder.sort(String::compareToIgnoreCase); //
 		return champOrder;
 	}
 
 	/** Determine the index in an array of files[] of the most recently modified file
 	 * by comparing the lastModified property from all files in the array.
-	 *
 	 * @param  fileList Array of files from a desired directory
 	 * @return Integer index of most recently modified file/directory.
-	 * Returns -1 if the File[] array is null. 
-	 */
+	 * Returns -1 if the File[] array is null. */
 	public static int getLatestModified(File[] fileList){
 		if(fileList!= null){
 			long latestVersion = 0;
@@ -308,50 +321,37 @@ public class LeagueData {
 			return -1;
 		}
 	}
+
+	/** Convert a java.awt.image into a java.awt.bufferedimage */
 	public static BufferedImage toBufferedImage(Image image) {
 		if (image instanceof BufferedImage)
-			return (BufferedImage)image;
+			return (BufferedImage)image;		// This code ensures that all the pixels in the image are loaded
 
-		// This code ensures that all the pixels in the image are loaded
-		image = new ImageIcon(image).getImage();
-
-		// Determine if the image has transparent pixels
+		image = new ImageIcon(image).getImage(); 		// Determine if the image has transparent pixels
 		boolean hasAlpha = hasAlpha(image);
-
-		// Create a buffered image with a format that's compatible with the screen
-		BufferedImage bimage = null;
-
+		BufferedImage bimage = null;		// Create a buffered image with a format that's compatible with the screen
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
 		try {
 			// Determine the type of transparency of the new buffered image
 			int transparency = Transparency.OPAQUE;
-
 			if (hasAlpha == true)
 				transparency = Transparency.BITMASK;
-
 			// Create the buffered image
 			GraphicsDevice gs = ge.getDefaultScreenDevice();
 			GraphicsConfiguration gc = gs.getDefaultConfiguration();
-
 			bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
 		} catch (HeadlessException e) { } //No screen
-
 		if (bimage == null) {
 			// Create a buffered image using the default color model
 			int type = BufferedImage.TYPE_INT_RGB;
-
 			if (hasAlpha == true) {type = BufferedImage.TYPE_INT_ARGB;}
 			bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
 		}
 
-		// Copy image to buffered image
-		Graphics g = bimage.createGraphics();
-
-		// Paint the image onto the buffered image
-		g.drawImage(image, 0, 0, null);
+		Graphics g = bimage.createGraphics();		// Copy image to buffered image
+		g.drawImage(image, 0, 0, null); 		// Paint the image onto the buffered image
 		g.dispose();
-
 		return bimage;
 	}
 
@@ -377,6 +377,7 @@ public class LeagueData {
 	 * @param image in CMYK encoding
 	 * @return image in RGB encoding 
 	 * @throws IOException  */
+	@SuppressWarnings("unused")
 	private static BufferedImage convertCMYK2RGB(BufferedImage image) throws IOException{
 		//Create a new RGB image
 		BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(),
@@ -392,9 +393,7 @@ public class LeagueData {
 	 * @param source
 	 * @param targetWidth
 	 * @param targetHeight 
-	 * @param preserveRatio preserve param for imageview
-	 * @return
-	 */
+	 * @param preserveRatio preserve param for imageview 	 */
 	public static WritableImage scale(WritableImage source, int targetWidth, int targetHeight, boolean preserveRatio) {
 		ImageView imageView = new ImageView(source);
 		imageView.setSmooth(true);
@@ -405,4 +404,81 @@ public class LeagueData {
 	}
 
 
+	/** Return an integer value (low rank to high rank) for a rank string. */
+	public int tierToInt(String rank){
+		int n = -1;
+		if(rank.equalsIgnoreCase("provisional")){
+			n = 0;
+		}else if(rank.equalsIgnoreCase("bronze")){
+			n = 1;
+		}else if(rank.equalsIgnoreCase("silver")){
+			n = 2;
+		}else if(rank.equalsIgnoreCase("gold")){
+			n = 3;
+		}else if(rank.equalsIgnoreCase("platinum")){
+			n = 4;
+		}else if(rank.equalsIgnoreCase("diamond")){
+			n = 5;
+		}else if(rank.equalsIgnoreCase("master")){
+			n = 6;
+		}else if(rank.equalsIgnoreCase("challenger")){
+			n = 7;
+		}
+		return n;
+	}
+	/** Return an string value (low rank to high rank) for a int rank (1-7). */
+	public String intToTier(int n){
+		String rank = "";
+		if(n == 0){
+			rank = "provisional";
+		}else if(n == 1){
+			rank = "bronze";
+		}else if(n == 2){
+			rank = "silver";
+		}else if(n == 3){
+			rank = "gold";
+		}else if(n == 4){
+			rank = "platinum";
+		}else if(n == 5){
+			rank = "diamond";
+		}else if(n == 6){
+			rank = "master";
+		}else if(n == 7){
+			rank = "challenger";
+		}
+		return rank;
+	}
+	/** Return an integer value (1-5) from roman numeral rank. */
+	public int romanToInt(String roman){
+		int n = 0;
+		if(roman.equalsIgnoreCase("i")){
+			n = 1;
+		}else if(roman.equalsIgnoreCase("ii")){
+			n = 2;
+		}else if(roman.equalsIgnoreCase("iii")){
+			n = 3;
+		}else if(roman.equalsIgnoreCase("iv")){
+			n = 4;
+		}else if(roman.equalsIgnoreCase("v")){
+			n = 5;
+		}
+		return n;
+	}
+
+	/** Return a roman numeral rank from integer value (1-5). */
+	public String intToRoman(int n){
+		String roman = "";
+		if(n == 1){
+			roman = "I";
+		}else if(n == 2){
+			roman = "II";
+		}else if(n == 3){
+			roman = "III";
+		}else if(n == 4){
+			roman = "IV";
+		}else if(n == 5){
+			roman = "V";
+		}
+		return roman;
+	}
 }

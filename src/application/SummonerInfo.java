@@ -5,14 +5,14 @@ package application;
  * @author Jacob Webber
  */
 public class SummonerInfo {
-	public int errorcode = -1;
+	public String errorcode = "";
 	public String summonername = "";
 	public String champname = "";
 	public String ranktier = "";
 	public String rankdivision = "";
 	public int ranklp = 0;
 	public int champmasterylevel = 0;
-	public int champmasterypoints = 0;
+	public long champmasterypoints = 0;
 	public int champgameswon = 0;
 	public int champgameslost = 0;
 	public int champgamestotal = 0;
@@ -22,7 +22,7 @@ public class SummonerInfo {
 	public int rankedtotalwins = 0;
 	public int rankedtotallosses = 0;
 	public SummonerInfo(){
-		this.errorcode = -1;
+		this.errorcode = "";
 	}
 	/** Print out the summoner variables */
 	public void printinfo(){
