@@ -101,9 +101,11 @@ anima {
 	border-color: white;
     border-top: 2px solid #6fcedb;
     border-right: 2px solid #6fcedb;
+    border-margin: 0 10% 0 10%;
+
   
   max-width: 960px;
-  max-height: 700px;
+  max-height: 600px;
   position: relative;
   overflow: hidden;  
   display: inline-block;
@@ -117,6 +119,28 @@ anima {
   -o-backface-visibility: hidden;
   -ms-backface-visibility: hidden;
   backface-visibility: hidden;
+}
+.pic-rotator {
+	margin-left: auto;
+	margin-right: auto;
+	float: initial;
+	width: 100%;
+	height: auto;
+	max-width: 960px;
+	max-height: 600px;
+	position: relative;
+	overflow: hidden;  
+	display: inline-block;
+	-webkit-animation: anima 2s;
+	-moz-animation: anima 2s;
+	-o-animation: anima 2s;
+	-ms-animation: anima 2s;
+	animation: anima 2s;
+	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+	-o-backface-visibility: hidden;
+	-ms-backface-visibility: hidden;
+	backface-visibility: hidden;
 }
 
 .pic-3d {

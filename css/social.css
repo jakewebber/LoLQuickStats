@@ -118,7 +118,7 @@ margin 0.4s 0s;
   border: 1px solid rgba(255,255,255,1);
 }
 
-.social .facebook:hover, .social .twitter:hover, .social .google5:hover {
+.social .facebook:hover, .social .twitter:hover, .social .google5:hover, .social .github:hover, .social .linkedin:hover {
   -webkit-transition: 0.2s;
   transition: 0.2s;
   -webkit-transition-delay: 0s;
@@ -130,6 +130,21 @@ margin 0.4s 0s;
 }
 
 .social .facebook:hover {
+  background-color: #5C7CD4;
+}
+
+.social .github {
+  background-color: purple;
+}
+
+.social .github:hover {
+  background-color: purple;
+}
+.social .linkedin {
+  background-color: #3b5998;
+}
+
+.social .linkedin:hover {
   background-color: #5C7CD4;
 }
 
