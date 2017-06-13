@@ -1,6 +1,7 @@
 Update for the upcoming season and Alpha Client changes in progress.
 
 <img align="center" src="https://raw.githubusercontent.com/jakewebber/LoLQuickStats/master/banner.png">
+
 ### Current Version: 1.0
 <i>Instant stats for your League of Legends team lobby before you load in game, just a few clicks away.</i>
 
@@ -8,7 +9,9 @@ LoLQuickStats is faster than any other tool for looking up complete team stats w
 
 ## [DOWNLOAD HERE](https://github.com/jakewebber/LoLQuickStats/blob/master/LoLQuickStats.zip?raw=true)
 and run `LoLQuickStats.jar`
-<img align="center" src=https://github.com/jakewebber/LoLQuickStats/blob/master/demo1.gif?raw=true>
+
+
+<img align="center" src=https://github.com/jakewebber/LoLQuickStats/blob/master/demo1.gif></img>
 
 # Instructions
 * Have LoLQuickStats open and use  `alt + printscreen` to capture your current game lobby to the clipboard once all summoners have locked or hovered their champions.
